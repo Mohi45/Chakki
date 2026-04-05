@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Atta Chakki Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+
+    <!-- Firebase v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <img src="img/chakkilogo.png" class="logo-img" onclick="setPage('dashboard')">
+
+        <h2 class="title">Shree Ganesh Chakki</h2>
+
+        <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    </div>
+
+    <div id="app"></div>
+
+    <!-- ✅ INSTALL BUTTON HERE -->
+    <button id="installBtn" style="display:none; margin:10px;">
+        📲 Install App
+    </button>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <button onclick="setPage('dashboard')">🏠<br>Home</button>
+        <button onclick="setPage('sales')">💰<br>Sales</button>
+        <button onclick="setPage('purchase')">🛒<br>Buy</button>
+        <button onclick="setPage('expense')">💸<br>Exp</button>
+        <button onclick="setPage('udhaar')">📒<br>Udhaar</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
