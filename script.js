@@ -254,6 +254,46 @@ function addUdhaar() {
 
     save(); render();
 }
+// OPEN POPUP
+function openPopup() {
+    let select = document.getElementById("existingCustomer");
+
+    // GET UNIQUE CUSTOMERS
+    let customers = [...new Set(udhaar.map(u => u.name))];
+
+    select.innerHTML = customers.map(c => `<option value="${c}">${c}</option>`).join("");
+
+    document.getElementById("udharPopup").style.display = "flex";
+}
+
+// CLOSE POPUP
+function closePopup() {
+    document.getElementById("udharPopup").style.display = "none";
+}
+
+// SAVE FROM POPUP
+function savePopupUdhaar() {
+    let name = document.getElementById("existingCustomer").value;
+    let amt = +document.getElementById("popupAmount").value;
+
+    if (!name || !amt) return alert("Enter amount");
+
+    // FIND PHONE FROM EXISTING
+    let user = udhaar.find(u => u.name === name);
+
+    udhaar.push({
+        name: name,
+        phone: user ? user.phone : "",
+        amount: amt,
+        date: new Date().toLocaleDateString(),
+        received: false,
+        method: ""
+    });
+
+    save();
+    closePopup();
+    render();
+}
 
 // ✔ TOGGLE
 function toggleReceived(name, index) {

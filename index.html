@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4CAF50">
+    <meta name="theme-color" content="#ff6b00">
 
     <!-- Firebase v8 -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -15,22 +15,37 @@
 </head>
 
 <body>
+
+    <!-- HEADER -->
     <div class="header">
         <img src="img/chakkilogo.png" class="logo-img" onclick="setPage('dashboard')">
-
-        <h2 class="title">Shree Ganesh Chakki</h2>
-
+        <h2 class="title">GhanShayam Bhoag Atta Chakki</h2>
         <button class="theme-btn" onclick="toggleTheme()">🌙</button>
     </div>
 
+    <!-- MAIN APP -->
     <div id="app"></div>
 
-    <!-- ✅ INSTALL BUTTON HERE -->
+    <!-- 📲 INSTALL BUTTON -->
     <button id="installBtn" style="display:none; margin:10px;">
         📲 Install App
     </button>
 
-    <!-- Bottom Nav -->
+    <!-- 📒 UDHAAR POPUP -->
+    <div id="udharPopup" class="popup">
+        <div class="popup-box">
+            <h3>📒 Add Udhaar</h3>
+
+            <select id="existingCustomer"></select>
+
+            <input id="popupAmount" placeholder="Amount">
+
+            <button onclick="savePopupUdhaar()">Save</button>
+            <button onclick="closePopup()" style="background:red;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <button onclick="setPage('dashboard')">🏠<br>Home</button>
         <button onclick="setPage('sales')">💰<br>Sales</button>
@@ -39,7 +54,9 @@
         <button onclick="setPage('udhaar')">📒<br>Udhaar</button>
     </div>
 
+    <!-- SCRIPT -->
     <script src="script.js"></script>
+
 </body>
 
 </html>
