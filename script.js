@@ -142,9 +142,8 @@ function render() {
         return;
     }
 
-    // 📒 UDHAAR TABLE WITH HEADER
+    // 📒 UDHAAR
     if (page === "udhaar") {
-
         let list = udhaar.map((u, i) => `
         <li class="card udhar-row">
             <span>${u.date || "-"}</span>
@@ -157,14 +156,13 @@ function render() {
                 </button>
             </span>
         </li>
-    `).join("");
+        `).join("");
 
         app.innerHTML = `
         <div class="card" style="text-align:center;">
             <h2>📒 Udhar Khata</h2>
         </div>
 
-        <!-- HEADER -->
         <div class="udhar-row header">
             <b>Date</b>
             <b>Name</b>
@@ -176,8 +174,7 @@ function render() {
         <ul style="list-style:none;padding:0;">
             ${list || "<p style='text-align:center;'>No Udhaar Data</p>"}
         </ul>
-    `;
-
+        `;
         return;
     }
 }
@@ -236,66 +233,77 @@ function addExpense() {
     save(); render();
 }
 
-function addUdhaar() {
-    let n = document.getElementById("n").value;
-    let ph = document.getElementById("ph").value;
-    let amt = +document.getElementById("amt").value;
-
-    if (!n || !amt) return;
-
-    udhaar.push({
-        name: n,
-        phone: ph,
-        amount: amt,
-        date: new Date().toLocaleDateString(),
-        received: false,
-        method: ""
-    });
-
-    save(); render();
-}
-// OPEN POPUP
+// 📒 UDHAAR FUNCTIONS
 function openPopup() {
+    // Load existing customers
     let select = document.getElementById("existingCustomer");
-
-    // GET UNIQUE CUSTOMERS
     let customers = [...new Set(udhaar.map(u => u.name))];
+    select.innerHTML = `<option value="">Select Existing Customer</option>` +
+        customers.map(c => `<option value="${c}">${c}</option>`).join("");
 
-    select.innerHTML = customers.map(c => `<option value="${c}">${c}</option>`).join("");
-
+    // Show popup
     document.getElementById("udharPopup").style.display = "flex";
 }
 
-// CLOSE POPUP
 function closePopup() {
     document.getElementById("udharPopup").style.display = "none";
 }
 
-// SAVE FROM POPUP
 function savePopupUdhaar() {
-    let name = document.getElementById("existingCustomer").value;
-    let amt = +document.getElementById("popupAmount").value;
+    let existing = document.getElementById("existingCustomer").value;
+    let newCustomerName = document.getElementById("newCustomerName").value.trim();
+    let newCustomerPhone = document.getElementById("newCustomerPhone").value.trim();
+    let amount = +document.getElementById("popupAmount").value;
 
-    if (!name || !amt) return alert("Enter amount");
+    if (!amount || amount <= 0) {
+        alert("Enter a valid amount");
+        return;
+    }
 
-    // FIND PHONE FROM EXISTING
-    let user = udhaar.find(u => u.name === name);
+    let customerName = "";
+    let phone = "";
 
+    // New customer logic
+    if (newCustomerName !== "") {
+        customerName = newCustomerName;
+
+        // Validate phone: must be exactly 10 digits
+        if (!/^\d{10}$/.test(newCustomerPhone)) {
+            alert("Enter a valid 10-digit phone number");
+            return;
+        }
+        phone = newCustomerPhone;
+
+    } else if (existing !== "") {
+        customerName = existing;
+        phone = "-"; // or store phone if available
+    } else {
+        alert("Select or enter customer name");
+        return;
+    }
+
+    // Add udhaar entry
     udhaar.push({
-        name: name,
-        phone: user ? user.phone : "",
-        amount: amt,
+        name: customerName,
+        phone: phone,
+        amount: amount,
         date: new Date().toLocaleDateString(),
         received: false,
         method: ""
     });
 
     save();
-    closePopup();
     render();
+
+    // Clear popup fields
+    document.getElementById("newCustomerName").value = "";
+    document.getElementById("newCustomerPhone").value = "";
+    document.getElementById("popupAmount").value = "";
+    document.getElementById("existingCustomer").value = "";
+
+    closePopup();
 }
 
-// ✔ TOGGLE
 function toggleReceived(name, index) {
     let c = -1;
     for (let i = 0; i < udhaar.length; i++) {
@@ -303,25 +311,6 @@ function toggleReceived(name, index) {
             c++;
             if (c === index) {
                 udhaar[i].received = !udhaar[i].received;
-                break;
-            }
-        }
-    }
-    save(); render();
-}
-
-// 💰 COLLECT
-function collectMoney(name, index) {
-    let m = prompt("cash or upi?");
-    if (!m) return;
-
-    let c = -1;
-    for (let i = 0; i < udhaar.length; i++) {
-        if (udhaar[i].name === name) {
-            c++;
-            if (c === index) {
-                udhaar[i].received = true;
-                udhaar[i].method = m.toLowerCase();
                 break;
             }
         }
@@ -347,8 +336,8 @@ function toggleTheme() {
 window.onload = function () {
     startLiveSync();
 };
-let deferredPrompt;
 
+let deferredPrompt;
 window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e;
@@ -357,10 +346,10 @@ window.addEventListener("beforeinstallprompt", (e) => {
 
 document.getElementById("installBtn").onclick = async () => {
     if (!deferredPrompt) return;
-
     deferredPrompt.prompt();
     deferredPrompt = null;
 };
+
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker.register("sw.js")

@@ -11,7 +11,7 @@
     --card: #ffffff;
     --text: #222;
 
-    --primary: #ff6b00;
+    --primary: #1a135f;
     --primary-dark: #e65100;
 }
 
@@ -190,7 +190,7 @@ li {
 
 .udhar-row.header {
     font-weight: bold;
-    background: #c2df05;
+    background: #2cd0b0;
     border-radius: 8px;
 }
 
@@ -215,6 +215,7 @@ li {
 
 .popup {
     display: none;
+    /* hidden by default */
     position: fixed;
     top: 0;
     left: 0;
@@ -222,15 +223,18 @@ li {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     justify-content: center;
+    /* center content horizontally */
     align-items: center;
+    /* center content vertically */
+    z-index: 1000;
 }
 
 .popup-box {
-    background: var(--card);
+    background: white;
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 10px;
     width: 90%;
-    max-width: 300px;
+    max-width: 400px;
 }
 
 /* ANIMATION */

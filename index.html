@@ -19,7 +19,7 @@
     <!-- HEADER -->
     <div class="header">
         <img src="img/chakkilogo.png" class="logo-img" onclick="setPage('dashboard')">
-        <h2 class="title">GhanShayam Bhoag Atta Chakki</h2>
+        <h2 class="title">GhanShayam Bhog Atta Chakki</h2>
         <button class="theme-btn" onclick="toggleTheme()">🌙</button>
     </div>
 
@@ -30,20 +30,33 @@
     <button id="installBtn" style="display:none; margin:10px;">
         📲 Install App
     </button>
-
     <!-- 📒 UDHAAR POPUP -->
     <div id="udharPopup" class="popup">
         <div class="popup-box">
             <h3>📒 Add Udhaar</h3>
 
-            <select id="existingCustomer"></select>
+            <!-- Existing Customer -->
+            <select id="existingCustomer">
+                <option value="">Select Existing Customer</option>
+            </select>
 
+            <p style="text-align:center;">OR</p>
+
+            <!-- New Customer -->
+            <input id="newCustomerName" placeholder="New Customer Name">
+            <input id="newCustomerPhone" placeholder="Phone Number">
+
+            <!-- Amount -->
             <input id="popupAmount" placeholder="Amount">
 
+            <br><br>
             <button onclick="savePopupUdhaar()">Save</button>
-            <button onclick="closePopup()" style="background:red;">Cancel</button>
+            <button onclick="closePopup()" style="background:red;color:white;">Cancel</button>
         </div>
     </div>
+    <button onclick="openPopup()" style="margin:10px;">
+        📒 Add Udhaar
+    </button>
 
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
