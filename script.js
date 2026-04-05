@@ -1,5 +1,5 @@
 // 🔐 PASSWORD
-const ADMIN_PASSWORD = "1234";
+const ADMIN_PASSWORD = "Safachatt@1234";
 
 function checkPassword() {
     let pass = prompt("Enter password");
