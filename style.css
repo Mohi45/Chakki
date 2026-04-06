@@ -5,14 +5,14 @@
     font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* THEME COLORS */
+/* THEME */
 :root {
     --bg: #f4f7fb;
     --card: #ffffff;
     --text: #222;
 
     --primary: #1a135f;
-    --primary-dark: #e65100;
+    --primary-dark: #ff6b00;
 }
 
 body.dark {
@@ -31,9 +31,9 @@ body {
 
 /* HEADER */
 .header {
-    display: grid;
-    grid-template-columns: 50px 1fr 50px;
+    display: flex;
     align-items: center;
+    gap: 10px;
     padding: 12px;
     border-radius: 14px;
     margin-bottom: 12px;
@@ -46,28 +46,26 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 10px;
-    object-fit: cover;
 }
 
 .title {
+    flex: 1;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
 }
 
-.theme-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    border: none;
-}
-
-/* DASHBOARD GRID (RESPONSIVE 🔥) */
+/* DASHBOARD */
 .dashboard {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-top: 10px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+@media (min-width: 600px) {
+    .dashboard {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* CARD */
@@ -76,24 +74,13 @@ body {
     padding: 16px;
     border-radius: 14px;
     text-align: center;
-    margin-bottom: 6px;
-
+    margin-bottom: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-body.dark .card {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-
-/* STAT */
-.stat {
-    font-weight: 600;
-}
-
 .stat h3 {
-    color: var(--primary);
+    color: var(--primary-dark);
     margin-top: 6px;
-    font-size: 18px;
 }
 
 /* INPUT */
@@ -106,7 +93,7 @@ select {
     border: 1px solid #ccc;
     background: var(--card);
     color: var(--text);
-    font-size: 15px;
+    font-size: 16px;
 }
 
 /* BUTTON */
@@ -116,22 +103,13 @@ button {
     border-radius: 12px;
     border: none;
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: #fff;
-    font-size: 15px;
+    color: white;
+    font-size: 16px;
     font-weight: bold;
-    cursor: pointer;
 }
 
 button:active {
-    transform: scale(0.97);
-}
-
-/* LIST */
-li {
-    background: var(--card);
-    padding: 10px;
-    margin: 6px 0;
-    border-radius: 10px;
+    transform: scale(0.96);
 }
 
 /* ALERT */
@@ -140,91 +118,50 @@ li {
     padding: 12px;
     border-radius: 12px;
     background: linear-gradient(135deg, #ff5252, #d32f2f);
-    color: #fff;
-    font-weight: bold;
+    color: white;
     text-align: center;
-    animation: pulse 1.5s infinite;
-}
-
-/* BOTTOM NAV (IMPROVED 🔥) */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-
-    display: flex;
-    padding: 6px 0;
-
-    background: var(--card);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.bottom-nav button {
-    flex: 1;
-    background: none;
-    color: var(--text);
-    font-size: 12px;
-    padding: 6px;
-}
-
-.bottom-nav button.active {
-    color: var(--primary);
     font-weight: bold;
 }
 
-/* UDHAAR ROW (MOBILE FIX 🔥) */
-.udhar-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    font-size: 13px;
-}
-
-.udhar-row.header {
-    font-weight: bold;
-    background: #2cd0b0;
-    border-radius: 8px;
-}
-
-.udhar-line {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-
-    padding: 10px;
-    margin: 6px 0;
-    border-radius: 10px;
-
+/* UDHAAR CARD (MOBILE PERFECT) */
+.udhaar-card {
     background: var(--card);
+    margin: 10px;
+    padding: 14px;
+    border-radius: 14px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-
-    font-size: 13px;
 }
 
-.udhar-line span {
-    flex: 1;
-    text-align: center;
-    white-space: nowrap;
-}
-
-.udhar-line button {
-    flex: 0;
-    padding: 6px 8px;
+.udhaar-card .row {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0;
     font-size: 14px;
-    width: auto;
 }
 
-/* INSTALL BUTTON */
-#installBtn {
-    width: 95%;
-    margin: 10px auto;
-    display: block;
-    padding: 12px;
-    border-radius: 10px;
+.udhaar-card .top {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.udhaar-card .amount {
+    color: var(--primary-dark);
+    font-weight: bold;
+}
+
+/* ACTION BUTTONS */
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.actions button {
+    width: 48px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 16px;
 }
 
 /* POPUP */
@@ -246,22 +183,67 @@ li {
 .popup-box {
     background: var(--card);
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 14px;
     width: 90%;
     max-width: 400px;
 }
 
-/* ANIMATION */
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
+/* INSTALL BUTTON */
+#installBtn {
+    width: 95%;
+    margin: 10px auto;
+    display: block;
+}
 
-    50% {
-        transform: scale(1.03);
-    }
+/* BOTTOM NAV */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
 
-    100% {
-        transform: scale(1);
-    }
+    display: flex;
+    padding: 6px 0;
+
+    background: var(--card);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.bottom-nav button {
+    flex: 1;
+    background: none;
+    color: var(--text);
+    font-size: 11px;
+    padding: 6px;
+}
+
+.bottom-nav button.active {
+    color: var(--primary-dark);
+    font-weight: bold;
+}
+
+#updateBox {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: #1a135f;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+    z-index: 9999;
+}
+
+#updateBox button {
+    background: #ff6b00;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    color: white;
 }

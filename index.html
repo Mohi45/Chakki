@@ -29,23 +29,22 @@
     <button id="installBtn" style="display:none; margin:10px;">
         📲 Install App
     </button>
-    <!-- 📒 UDHAAR POPUP -->
+
+    <!-- 📒 UDHAAR POPUP (FIXED) -->
     <div id="udharPopup" class="popup">
         <div class="popup-box">
             <h3>📒 Add Udhaar</h3>
 
-            <!-- Existing Customer -->
-            <select id="existingCustomer">
-                <option value="">Select Existing Customer</option>
-            </select>
+            <!-- 🔍 SEARCH OR ADD NEW -->
+            <input list="popupCustomerList" id="newCustomerName" placeholder="Search or Add Customer"
+                oninput="autoFillPhone('newCustomerName','newCustomerPhone')">
 
-            <p style="text-align:center;">OR</p>
+            <datalist id="popupCustomerList"></datalist>
 
-            <!-- New Customer -->
-            <input id="newCustomerName" placeholder="New Customer Name">
+            <!-- 📱 PHONE -->
             <input id="newCustomerPhone" placeholder="Phone Number">
 
-            <!-- Amount -->
+            <!-- 💰 AMOUNT -->
             <input id="popupAmount" placeholder="Amount">
 
             <br><br>
@@ -62,7 +61,7 @@
         <button onclick="setPage('purchase')">🛒<br>Buy</button>
         <button onclick="setPage('expense')">💸<br>Exp</button>
         <button onclick="setPage('udhaar')">📒<br>Udhaar</button>
-        <button onclick="setPage('ledger')">📊<br>LEDGER</button>
+        <button onclick="setPage('ledger')">📊<br>Ledger</button>
     </div>
 
     <!-- SCRIPT -->

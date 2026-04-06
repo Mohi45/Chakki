@@ -1,10 +1,6 @@
 // 🔐 PASSWORD
 const ADMIN_PASSWORD = "Safachatt@1234";
-const UPI_ID = "9758620961-2@ybl"; // 👈 replace with your real UPI
-function checkPassword() {
-    let pass = prompt("Enter password");
-    return pass === ADMIN_PASSWORD;
-}
+const UPI_ID = "9758620961-2@ybl";
 
 // 🔥 FIREBASE CONFIG
 const firebaseConfig = {
@@ -19,17 +15,8 @@ const db = firebase.firestore();
 // 📦 DATA
 let sales = [], expenses = [], purchase = [], udhaar = [], pisai = [], payments = [], stock = 0;
 let page = "dashboard";
-const LOW_STOCK_LIMIT = 50;
 
-const pageTitles = {
-    dashboard: "🏠 Home",
-    sales: "💰 Sales",
-    pisai: "🌾 Pisai",
-    purchase: "🛒 Purchase",
-    expense: "💸 Expense",
-    udhaar: "📒 Udhaar",
-    ledger: "📊 Ledger"
-};
+const LOW_STOCK_LIMIT = 50;
 
 // 🔄 LIVE SYNC
 function startLiveSync() {
@@ -67,16 +54,22 @@ function getCustomers() {
     return [...new Set(names.filter(Boolean))];
 }
 
+// 📱 AUTO PHONE
+function getCustomerPhone(name) {
+    let all = [...sales, ...pisai, ...udhaar];
+    let found = all.find(x => x.name === name && x.phone);
+    return found ? found.phone : "";
+}
+
+function autoFillPhone(inputId, phoneId) {
+    let name = document.getElementById(inputId).value;
+    let phone = getCustomerPhone(name);
+    if (phone) document.getElementById(phoneId).value = phone;
+}
+
 // 📄 NAV
 function setPage(p) {
     page = p;
-
-    // ✅ Update title
-    let title = document.getElementById("pageTitle");
-    if (title) {
-        title.innerText = "GhanShayam Bhog Atta Chakki - " + pageTitles[p] || "GhanShayam Bhog Atta Chakki";
-    }
-
     render();
 }
 
@@ -87,7 +80,9 @@ function render() {
     let customers = getCustomers()
         .map(c => `<option value="${c}">${c}</option>`)
         .join("");
+
     let totalCustomers = getCustomers().length;
+
     // 📊 CALCULATIONS
     let totalKg = purchase.reduce((a, b) => a + b.kg, 0);
     let totalCost = purchase.reduce((a, b) => a + b.amount, 0);
@@ -115,16 +110,16 @@ function render() {
     if (page === "dashboard") {
         app.innerHTML = `
         ${alertBox}
-       <div class="dashboard">
-       <div class="card stat">Customers<h3>${totalCustomers}</h3></div>
-    <div class="card stat">Stock<h3>${stock}kg</h3></div>
-    <div class="card stat">Sales<h3>₹${totalSales.toFixed(2)}</h3></div>
-    <div class="card stat">Expense<h3>₹${totalExp.toFixed(2)}</h3></div>
-    <div class="card stat">Pisai<h3>₹${pisaiIncome.toFixed(2)}</h3></div>
-    <div class="card stat">Udhaar<h3>₹${totalUdhaar.toFixed(2)}</h3></div>
-    <div class="card stat">Received<h3>₹${receivedUdhaar.toFixed(2)}</h3></div>
-    
-</div>
+        <div class="dashboard">
+            <div class="card stat">Customers<h3>${totalCustomers}</h3></div>
+            <div class="card stat">Stock<h3>${stock}kg</h3></div>
+            <div class="card stat">Sales<h3>₹${totalSales.toFixed(2)}</h3></div>
+            <div class="card stat">Expense<h3>₹${totalExp.toFixed(2)}</h3></div>
+            <div class="card stat">Profit<h3>₹${profit.toFixed(2)}</h3></div>
+            <div class="card stat">Pisai<h3>₹${pisaiIncome.toFixed(2)}</h3></div>
+            <div class="card stat">Udhaar<h3>₹${totalUdhaar.toFixed(2)}</h3></div>
+            <div class="card stat">Received<h3>₹${receivedUdhaar.toFixed(2)}</h3></div>
+        </div>
 
         <div class="card">
             <button onclick="openPopup()">📒 Add Udhaar</button>
@@ -140,23 +135,26 @@ function render() {
     if (page === "sales") {
         app.innerHTML = `
         <div class="card">
-            <select id="name" onchange="handleCustomerSelect('name','newName')">
-                <option value="">Select Customer</option>
-                <option value="new">➕ Add New</option>
-                ${customers}
-            </select>
-            <input id="newName" placeholder="New Customer" style="display:none;">
+            <input list="customerList" id="name" placeholder="Search Customer"
+            oninput="autoFillPhone('name','phone')">
+            <datalist id="customerList">${customers}</datalist>
+
+            <input id="newName" placeholder="New Customer (if not found)">
             <input id="phone" placeholder="Phone">
+
             <select id="type">
                 <option value="9">9kg</option>
                 <option value="50">50kg</option>
             </select>
+
             <input id="pkt" placeholder="Packets">
             <input id="rate" placeholder="Rate">
+
             <select id="pay">
                 <option value="instant">Instant</option>
                 <option value="udhaar">Udhaar</option>
             </select>
+
             <button onclick="addSale()">Add Sale</button>
         </div>`;
         return;
@@ -166,52 +164,78 @@ function render() {
     if (page === "pisai") {
         app.innerHTML = `
         <div class="card">
-            <select id="pisaiName" onchange="handleCustomerSelect('pisaiName','newPisaiName')">
-                <option value="">Select Customer</option>
-                <option value="new">➕ Add New</option>
-                ${customers}
-            </select>
-            <input id="newPisaiName" placeholder="New Customer" style="display:none;">
+            <input list="customerList" id="pisaiName" placeholder="Search Customer"
+            oninput="autoFillPhone('pisaiName','pisaiPhone')">
+            <datalist id="customerList">${customers}</datalist>
+
             <input id="pisaiPhone" placeholder="Phone">
             <input id="pisaiKg" placeholder="Kg" oninput="calcPisai()">
             <h3 id="pisaiAmount">₹0</h3>
+
             <select id="pisaiPay">
                 <option value="instant">Instant</option>
                 <option value="udhaar">Udhaar</option>
             </select>
+
             <button onclick="addPisai()">Add Pisai</button>
+        </div>`;
+        return;
+    }
+
+    // 🛒 PURCHASE
+    if (page === "purchase") {
+        app.innerHTML = `
+        <div class="card">
+            <input id="kg" placeholder="Kg">
+            <input id="rate" placeholder="Rate">
+            <button onclick="addPurchase()">Add Purchase</button>
+        </div>`;
+        return;
+    }
+
+    // 💸 EXPENSE
+    if (page === "expense") {
+        app.innerHTML = `
+        <div class="card">
+            <input id="type" placeholder="Expense Type">
+            <input id="amt" placeholder="Amount">
+            <button onclick="addExpense()">Add Expense</button>
         </div>`;
         return;
     }
 
     // 📒 UDHAAR
     if (page === "udhaar") {
-        let list = udhaar.map((u, i) => `
-<div class="udhar-line">
-    <span>${u.date}</span>
-    <span>${u.name}</span>
-    <span>${u.phone || "-"}</span>
-    <span>₹${u.amount.toFixed(2)}</span>
 
-    <button onclick="sendWhatsApp('${u.name}','${u.phone}',${u.amount})">📲</button>
-    <button onclick="receivePayment('${u.name}',${i})">✔</button>
-</div>
-`).join("");
+        let list = udhaar.map((u, i) => `
+    <div class="udhaar-card">
+        
+        <div class="row top">
+            <span class="name">${u.name}</span>
+            <span class="amount">₹${u.amount.toFixed(2)}</span>
+        </div>
+
+        <div class="row">
+            <span>📅 ${u.date}</span>
+            <span>📞 ${u.phone || "-"}</span>
+        </div>
+
+        <div class="actions">
+            <button onclick="sendWhatsApp('${u.name}','${u.phone}',${u.amount})">📲</button>
+            <button onclick="receivePayment('${u.name}',${i})">✔</button>
+        </div>
+
+    </div>
+    `).join("");
 
         app.innerHTML = `
-        <div class="card"><h2>📒 Udhaar Khata Book</h2></div>
-        ${list || "<p>No Udhaar</p>"}`;
-        return;
-    }
+    <div class="card">
+        <h2>📒 Udhaar Khata Book</h2>
+    </div>
 
-    // 💰 PAYMENTS
-    if (page === "payments") {
-        let list = payments.map(p => `
-        <li class="card">
-            ${p.name} - ₹${p.paid.toFixed(2)}<br>${p.date}
-        </li>`).join("");
+    ${list || "<p style='text-align:center'>No Udhaar</p>"}
+    `;
 
-        app.innerHTML = `<div class="card"><h2>💰 Payments</h2></div>${list}`;
         return;
     }
 
@@ -227,33 +251,12 @@ function render() {
         </div>`;
         return;
     }
-    if (page === "purchase") {
-        app.innerHTML = `
-    <div class="card">
-        <input id="kg" placeholder="Kg">
-        <input id="rate" placeholder="Rate">
-        <button onclick="addPurchase()">Add Purchase</button>
-    </div>`;
-        return;
-    }
-    if (page === "expense") {
-        app.innerHTML = `
-    <div class="card">
-        <input id="type" placeholder="Expense Type">
-        <input id="amt" placeholder="Amount">
-        <button onclick="addExpense()">Add Expense</button>
-    </div>`;
-        return;
-    }
 }
 
 // ➕ FUNCTIONS
 
 function addSale() {
-    let sel = document.getElementById("name").value;
-    let newName = document.getElementById("newName").value;
-    let name = sel === "new" ? newName : sel;
-
+    let name = document.getElementById("name").value || document.getElementById("newName").value;
     let phone = document.getElementById("phone").value;
     let pkt = +document.getElementById("pkt").value;
     let rate = +document.getElementById("rate").value;
@@ -263,63 +266,44 @@ function addSale() {
     let kg = pkt * type;
     let amount = pkt * rate;
 
+    if (kg > stock) return alert("❌ Not enough stock!");
+
+    stock -= kg;
+
     sales.push({ name, phone, kg, amount, date: new Date().toLocaleDateString() });
 
     if (pay === "udhaar") {
         udhaar.push({ name, phone, amount, date: new Date().toLocaleDateString() });
     }
 
-    showSuccess();
-    save();
-    render();
+    save(); render();
 }
-//purchase function
+
 function addPurchase() {
     let kg = +document.getElementById("kg").value;
     let rate = +document.getElementById("rate").value;
 
     if (!kg || !rate) return alert("Enter data");
 
-    purchase.push({
-        kg,
-        amount: kg * rate,
-        date: new Date().toLocaleDateString()
-    });
-
+    purchase.push({ kg, amount: kg * rate, date: new Date().toLocaleDateString() });
     stock += kg;
 
-    document.getElementById("kg").value = "";
-    document.getElementById("rate").value = "";
-
-    showSuccess("Purchase Added");
-    save();
-    render();
+    save(); render();
 }
-//expense function
+
 function addExpense() {
     let type = document.getElementById("type").value;
     let amt = +document.getElementById("amt").value;
 
     if (!type || !amt) return alert("Enter data");
 
-    expenses.push({
-        type,
-        amount: amt,
-        date: new Date().toLocaleDateString()
-    });
+    expenses.push({ type, amount: amt, date: new Date().toLocaleDateString() });
 
-    document.getElementById("type").value = "";
-    document.getElementById("amt").value = "";
-
-    showSuccess("Expense Added");
-    save();
-    render();
+    save(); render();
 }
-function addPisai() {
-    let sel = document.getElementById("pisaiName").value;
-    let newName = document.getElementById("newPisaiName").value;
-    let name = sel === "new" ? newName : sel;
 
+function addPisai() {
+    let name = document.getElementById("pisaiName").value;
     let phone = document.getElementById("pisaiPhone").value;
     let kg = +document.getElementById("pisaiKg").value;
     let pay = document.getElementById("pisaiPay").value;
@@ -332,32 +316,70 @@ function addPisai() {
         udhaar.push({ name, phone, amount, date: new Date().toLocaleDateString() });
     }
 
-    showSuccess();
-    save();
-    render();
+    save(); render();
 }
 
-// 💰 RECEIVE PAYMENT
+function closePopup() {
+    document.getElementById("udharPopup").style.display = "none";
+}
+
+function savePopupUdhaar() {
+    let name = document.getElementById("newCustomerName").value.trim();
+    let phone = document.getElementById("newCustomerPhone").value.trim();
+    let amount = +document.getElementById("popupAmount").value;
+
+    if (!name || !amount) {
+        alert("Enter details");
+        return;
+    }
+
+    // ✅ Save udhaar
+    udhaar.push({
+        name,
+        phone,
+        amount,
+        date: new Date().toLocaleDateString()
+    });
+
+    // ✅ OPTIONAL: Save customer permanently (smart)
+    if (phone) {
+        sales.push({
+            name,
+            phone,
+            kg: 0,
+            amount: 0,
+            date: new Date().toLocaleDateString()
+        });
+    }
+
+    // ✅ Clear fields
+    document.getElementById("newCustomerName").value = "";
+    document.getElementById("newCustomerPhone").value = "";
+    document.getElementById("popupAmount").value = "";
+
+    closePopup();
+    save();
+    render();
+
+    alert("✅ Udhaar Added");
+}
+
+// 💰 RECEIVE
 function receivePayment(name, index) {
     let pending = udhaar[index].amount;
     let paid = +prompt(`Enter amount (Pending ₹${pending})`);
 
-    if (!paid || paid <= 0) return;
+    if (!paid) return;
 
     payments.push({ name, paid, date: new Date().toLocaleDateString() });
 
-    if (paid >= pending) {
-        udhaar.splice(index, 1);
-    } else {
-        udhaar[index].amount = +(pending - paid).toFixed(2);
-    }
+    if (paid >= pending) udhaar.splice(index, 1);
+    else udhaar[index].amount -= paid;
 
-    showSuccess("Payment Updated");
-    save();
-    render();
+    save(); render();
 }
 
-//Ledger Function
+// 📊 LEDGER
 function showLedger() {
     let name = document.getElementById("ledgerName").value;
 
@@ -372,7 +394,7 @@ function showLedger() {
     sales.filter(s => s.name === name)
         .forEach(s => entries.push({
             type: "Sale",
-            amount: s.amount,
+            amount: +(+s.amount).toFixed(2),
             date: s.date
         }));
 
@@ -380,7 +402,7 @@ function showLedger() {
     pisai.filter(p => p.name === name)
         .forEach(p => entries.push({
             type: "Pisai",
-            amount: p.amount,
+            amount: +(+p.amount).toFixed(2),
             date: p.date
         }));
 
@@ -388,27 +410,26 @@ function showLedger() {
     payments.filter(p => p.name === name)
         .forEach(p => entries.push({
             type: "Payment",
-            amount: -p.paid,
+            amount: -(+p.paid).toFixed(2),
             date: p.date
         }));
 
-    // SORT BY DATE
+    // SORT
     entries.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     let balance = 0;
 
     let html = entries.map(e => {
-        balance += e.amount;
+        balance += Number(e.amount);
 
         return `
         <div class="card">
             <b>${e.date}</b><br>
-            ${e.type}: ₹${e.amount.toFixed(2)}<br>
+            ${e.type}: ₹${Number(e.amount).toFixed(2)}<br>
             Balance: ₹${balance.toFixed(2)}
         </div>`;
     }).join("");
 
-    // ✅ IMPORTANT: REPLACE content (not append)
     document.getElementById("app").innerHTML = `
         <div class="card">
             <select id="ledgerName">
@@ -423,87 +444,89 @@ function showLedger() {
     `;
 }
 
-// 🌾 CALC
-function calcPisai() {
-    let kg = +document.getElementById("pisaiKg").value || 0;
-    document.getElementById("pisaiAmount").innerText = "₹" + (kg * 1.90).toFixed(2);
-}
-
-// 👤 NEW CUSTOMER TOGGLE
-function handleCustomerSelect(selectId, inputId) {
-    let select = document.getElementById(selectId);
-    let input = document.getElementById(inputId);
-
-    input.style.display = select.value === "new" ? "block" : "none";
-}
-
-// 📒 POPUP
-function openPopup() {
-    document.getElementById("udharPopup").style.display = "flex";
-}
-function closePopup() {
-    document.getElementById("udharPopup").style.display = "none";
-}
-function savePopupUdhaar() {
-    let name = document.getElementById("newCustomerName").value;
-    let phone = document.getElementById("newCustomerPhone").value;
-    let amount = +document.getElementById("popupAmount").value;
-
-    if (!name || !amount) return alert("Enter details");
-
-    udhaar.push({ name, phone, amount, date: new Date().toLocaleDateString() });
-
-    closePopup();
-    showSuccess("Udhaar Added");
-    save();
-    render();
-}
-
-// 🗑 DELETE
-function deleteAllData() {
-    if (!checkPassword()) return alert("Wrong password");
-    if (!confirm("Delete all data?")) return;
-
-    sales = []; expenses = []; purchase = [];
-    udhaar = []; pisai = []; payments = []; stock = 0;
-
-    save();
-    render();
-}
-
-// ✅ SUCCESS
-function showSuccess(msg = "✅ Done") {
-    alert(msg);
-}
-//send whatsaap Reminder
 function sendWhatsApp(name, phone, amount) {
 
-    if (!phone || phone === "-") {
-        alert("Phone number not available");
+    if (!phone || phone === "-" || phone.length < 10) {
+        alert("❌ Invalid phone number");
         return;
     }
 
-    // ✅ Correct UPI deep link (WORKING)
-    let upiLink = UPI_ID;
+    // ✅ Clean phone (remove spaces, +91 etc)
+    phone = phone.replace(/\D/g, "");
+
+    // ✅ Ensure Indian format
+    if (phone.length === 10) {
+        phone = "91" + phone;
+    }
 
     let msg =
         `Hello ${name} ji,
 
-Aapka Rs ${amount.toFixed(2)} udhaar baki hai.
+Aapka ₹${amount.toFixed(2)} udhaar baki hai.
 
 Pay here:
-${upiLink}
+${UPI_ID}
 
 Kripya payment kar dein.
 
 - GhanShayam Bhog Atta Chakki`;
 
-    let url = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
+    let url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 
     window.open(url, "_blank");
 }
+function loadPopupCustomers() {
+    let customers = getCustomers()
+        .map(c => `<option value="${c}">`)
+        .join("");
 
+    document.getElementById("popupCustomerList").innerHTML = customers;
+}
+function openPopup() {
+    loadPopupCustomers();
+    document.getElementById("udharPopup").style.display = "flex";
+}
 // 🚀 START
 window.onload = function () {
     startLiveSync();
 };
+// 🔄 REGISTER SERVICE WORKER
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").then(reg => {
+
+        reg.onupdatefound = () => {
+            const newWorker = reg.installing;
+
+            newWorker.onstatechange = () => {
+                if (newWorker.state === "installed") {
+                    if (navigator.serviceWorker.controller) {
+                        showUpdatePopup();
+                    }
+                }
+            };
+        };
+    });
+}
+
+// 🔔 SHOW UPDATE POPUP
+function showUpdatePopup() {
+    let box = document.createElement("div");
+    box.id = "updateBox";
+
+    box.innerHTML = `
+        🔄 New update available
+        <button onclick="updateApp()">Update</button>
+    `;
+
+    document.body.appendChild(box);
+}
+
+// 🔁 UPDATE APP
+function updateApp() {
+    navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg.waiting) {
+            reg.waiting.postMessage({ action: "skipWaiting" });
+        }
+        location.reload();
+    });
+}
