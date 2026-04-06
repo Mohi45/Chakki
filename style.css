@@ -2,7 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: sans-serif;
+    font-family: system-ui, -apple-system, sans-serif;
 }
 
 /* THEME COLORS */
@@ -25,8 +25,8 @@ body.dark {
 body {
     background: var(--bg);
     color: var(--text);
-    padding: 12px;
-    padding-bottom: 80px;
+    padding: 10px;
+    padding-bottom: 90px;
 }
 
 /* HEADER */
@@ -42,7 +42,6 @@ body {
     color: #fff;
 }
 
-/* LOGO */
 .logo-img {
     width: 40px;
     height: 40px;
@@ -50,14 +49,12 @@ body {
     object-fit: cover;
 }
 
-/* TITLE */
 .title {
     text-align: center;
     font-size: 18px;
     font-weight: bold;
 }
 
-/* THEME BUTTON */
 .theme-btn {
     width: 40px;
     height: 40px;
@@ -65,52 +62,51 @@ body {
     border: none;
 }
 
-/* GRID */
+/* DASHBOARD GRID (RESPONSIVE 🔥) */
 .dashboard {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
     margin-top: 10px;
 }
 
 /* CARD */
 .card {
     background: var(--card);
-    padding: 18px;
-    border-radius: 16px;
+    padding: 16px;
+    border-radius: 14px;
     text-align: center;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* DARK MODE CARD SHADOW */
 body.dark .card {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-/* STAT TEXT */
+/* STAT */
 .stat {
-    font-weight: bold;
-    color: var(--text);
+    font-weight: 600;
 }
 
-/* VALUE */
 .stat h3 {
     color: var(--primary);
     margin-top: 6px;
+    font-size: 18px;
 }
 
 /* INPUT */
 input,
 select {
     width: 100%;
-    padding: 12px;
-    margin: 6px 0;
+    padding: 14px;
+    margin: 8px 0;
     border-radius: 10px;
     border: 1px solid #ccc;
     background: var(--card);
     color: var(--text);
+    font-size: 15px;
 }
 
 /* BUTTON */
@@ -121,38 +117,36 @@ button {
     border: none;
     background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: #fff;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: bold;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(0.97);
 }
 
 /* LIST */
 li {
     background: var(--card);
-    padding: 12px;
+    padding: 10px;
     margin: 6px 0;
     border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
 }
 
 /* ALERT */
 .alert {
-    margin-top: 8px;
-    margin-bottom: 14px;
+    margin: 10px 0;
     padding: 12px;
     border-radius: 12px;
-
     background: linear-gradient(135deg, #ff5252, #d32f2f);
     color: #fff;
-
     font-weight: bold;
     text-align: center;
-
-    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.2);
     animation: pulse 1.5s infinite;
 }
 
-/* BOTTOM NAV */
+/* BOTTOM NAV (IMPROVED 🔥) */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -163,29 +157,30 @@ li {
     padding: 6px 0;
 
     background: var(--card);
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .bottom-nav button {
     flex: 1;
     background: none;
     color: var(--text);
-    font-size: 13px;
+    font-size: 12px;
+    padding: 6px;
 }
 
-/* ACTIVE NAV */
 .bottom-nav button.active {
     color: var(--primary);
     font-weight: bold;
 }
 
+/* UDHAAR ROW (MOBILE FIX 🔥) */
 .udhar-row {
     display: grid;
-    grid-template-columns: 120px 1fr 150px 100px 60px;
-    align-items: center;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
     padding: 10px;
     border-bottom: 1px solid #ddd;
-    text-align: center;
+    font-size: 13px;
 }
 
 .udhar-row.header {
@@ -194,45 +189,64 @@ li {
     border-radius: 8px;
 }
 
-.title {
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
+.udhar-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 10px;
+
+    background: var(--card);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+
+    font-size: 13px;
 }
 
+.udhar-line span {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.udhar-line button {
+    flex: 0;
+    padding: 6px 8px;
+    font-size: 14px;
+    width: auto;
+}
+
+/* INSTALL BUTTON */
 #installBtn {
-    width: 90%;
+    width: 95%;
     margin: 10px auto;
     display: block;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    color: white;
-    border: none;
     padding: 12px;
     border-radius: 10px;
-    font-weight: bold;
 }
 
+/* POPUP */
 .popup {
     display: none;
-    /* hidden by default */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+
     background: rgba(0, 0, 0, 0.5);
+
     justify-content: center;
-    /* center content horizontally */
     align-items: center;
-    /* center content vertically */
     z-index: 1000;
 }
 
 .popup-box {
-    background: white;
+    background: var(--card);
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     width: 90%;
     max-width: 400px;
 }

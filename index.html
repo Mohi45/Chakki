@@ -19,7 +19,7 @@
     <!-- HEADER -->
     <div class="header">
         <img src="img/chakkilogo.png" class="logo-img" onclick="setPage('dashboard')">
-        <h2 class="title">GhanShayam Bhog Atta Chakki</h2>
+        <h2 class="title" id="pageTitle">GhanShayam Bhog Atta Chakki</h2>
         <button class="theme-btn" onclick="toggleTheme()">🌙</button>
     </div>
 
@@ -54,17 +54,16 @@
             <button onclick="closePopup()" style="background:red;color:white;">Cancel</button>
         </div>
     </div>
-    <button onclick="openPopup()" style="margin:10px;">
-        📒 Add Udhaar
-    </button>
 
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <button onclick="setPage('dashboard')">🏠<br>Home</button>
         <button onclick="setPage('sales')">💰<br>Sales</button>
+        <button onclick="setPage('pisai')">🌾<br>Pisai</button>
         <button onclick="setPage('purchase')">🛒<br>Buy</button>
         <button onclick="setPage('expense')">💸<br>Exp</button>
         <button onclick="setPage('udhaar')">📒<br>Udhaar</button>
+        <button onclick="setPage('ledger')">📊<br>LEDGER</button>
     </div>
 
     <!-- SCRIPT -->
