@@ -29,7 +29,7 @@ function startLiveSync() {
             udhaar = d.udhaar || [];
             pisai = d.pisai || [];
             payments = d.payments || [];
-            stock = d.stock || 0;
+            stock = Number(d.stock || 0); // ✅ FIX
         } else {
             save();
         }
@@ -40,7 +40,13 @@ function startLiveSync() {
 // 💾 SAVE
 function save() {
     db.collection("data").doc("main").set({
-        sales, expenses, purchase, udhaar, pisai, payments, stock
+        sales,
+        expenses,
+        purchase,
+        udhaar,
+        pisai,
+        payments,
+        stock: Number(stock) // ✅ FIX
     }, { merge: true });
 }
 
@@ -54,15 +60,27 @@ function getCustomers() {
     return [...new Set(names.filter(Boolean))];
 }
 
-// 📱 AUTO PHONE
+// 📱 AUTO PHONE (IMPROVED)
 function getCustomerPhone(name) {
+    if (!name) return "";
+
+    name = name.toLowerCase().trim();
+
     let all = [...sales, ...pisai, ...udhaar];
-    let found = all.find(x => x.name === name && x.phone);
+
+    let found = all.find(x =>
+        x.name &&
+        x.phone &&
+        x.name.toLowerCase().trim() === name
+    );
+
     return found ? found.phone : "";
 }
 
 function autoFillPhone(inputId, phoneId) {
     let name = document.getElementById(inputId).value;
+    if (!name) return;
+
     let phone = getCustomerPhone(name);
     if (phone) document.getElementById(phoneId).value = phone;
 }
@@ -83,26 +101,27 @@ function render() {
 
     let totalCustomers = getCustomers().length;
 
-    // 📊 CALCULATIONS
-    let totalKg = purchase.reduce((a, b) => a + b.kg, 0);
-    let totalCost = purchase.reduce((a, b) => a + b.amount, 0);
-    let totalExp = expenses.reduce((a, b) => a + b.amount, 0);
+    // 📊 SAFE CALCULATIONS (FIXED)
+    let totalKg = purchase.reduce((a, b) => a + (b.kg || 0), 0);
+    let totalCost = purchase.reduce((a, b) => a + (b.amount || 0), 0);
+    let totalExp = expenses.reduce((a, b) => a + (b.amount || 0), 0);
 
     let avgCost = totalKg ? totalCost / totalKg : 0;
     let expPerKg = totalKg ? totalExp / totalKg : 0;
     let finalCost = avgCost + expPerKg;
 
-    let soldKg = sales.reduce((a, b) => a + b.kg, 0);
-    let totalSales = sales.reduce((a, b) => a + b.amount, 0);
+    let soldKg = sales.reduce((a, b) => a + (b.kg || 0), 0);
+    let totalSales = sales.reduce((a, b) => a + (b.amount || 0), 0);
     let sellRate = soldKg ? totalSales / soldKg : 0;
 
-    let profit = (sellRate - finalCost) * soldKg;
+    // ✅ FIXED PROFIT
+    let profit = soldKg ? (totalSales - (finalCost * soldKg)) : 0;
 
-    let totalPisaiKg = pisai.reduce((a, b) => a + b.kg, 0);
+    let totalPisaiKg = pisai.reduce((a, b) => a + (b.kg || 0), 0);
     let pisaiIncome = totalPisaiKg * 1.90;
 
-    let totalUdhaar = udhaar.reduce((a, b) => a + b.amount, 0);
-    let receivedUdhaar = payments.reduce((a, b) => a + b.paid, 0);
+    let totalUdhaar = udhaar.reduce((a, b) => a + (b.amount || 0), 0);
+    let receivedUdhaar = payments.reduce((a, b) => a + (b.paid || 0), 0);
 
     let alertBox = stock < LOW_STOCK_LIMIT ? `<div class='alert'>⚠️ Low Stock ${stock}kg</div>` : "";
 
@@ -130,7 +149,6 @@ function render() {
         </div>`;
         return;
     }
-
     // 💰 SALES
     if (page === "sales") {
         app.innerHTML = `
