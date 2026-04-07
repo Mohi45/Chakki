@@ -247,3 +247,42 @@ button:active {
     border-radius: 6px;
     color: white;
 }
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+.alert {
+    background: rgb(91, 3, 3);
+    color: white;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: 16px;
+
+    animation: blink 2.5s infinite;
+}
+
+.paid {
+    color: #16a34a;
+    /* green */
+    font-weight: bold;
+}
+
+.pending {
+    color: #dc2626;
+    /* red */
+    font-weight: bold;
+}

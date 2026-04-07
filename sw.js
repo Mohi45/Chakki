@@ -1,60 +1,50 @@
-// 🔄 VERSION (CHANGE THIS ON EVERY UPDATE)
-const CACHE_NAME = "chakki-app-v2";
+const CACHE_NAME = "chakki-v1";
 
-// 📦 FILES TO CACHE
 const urlsToCache = [
-    "./",
-    "./index.html",
-    "./style.css",
-    "./script.js",
-    "./img/chakkilogo192.png",
-    "./img/chakkilogo512.png"
+    "/",
+    "/index.html",
+    "/style.css",
+    "/js/config.js",
+    "/js/state.js",
+    "/js/firebase.js",
+    "/js/utils.js",
+    "/js/sales.js",
+    "/js/pisai.js",
+    "/js/udhaar.js",
+    "/js/ledger.js",
+    "/js/ui.js",
+    "/js/app.js"
 ];
 
-// 🚀 INSTALL
+// INSTALL
 self.addEventListener("install", event => {
-    self.skipWaiting(); // ✅ force new SW
-
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(urlsToCache))
     );
 });
 
-// 🔥 ACTIVATE (DELETE OLD CACHE)
-self.addEventListener("activate", event => {
-    event.waitUntil(
-        caches.keys().then(keys =>
-            Promise.all(
-                keys.map(key => {
-                    if (key !== CACHE_NAME) {
-                        return caches.delete(key); // ✅ remove old cache
-                    }
-                })
-            )
-        )
-    );
-
-    self.clients.claim();
-});
-
-// 🌐 FETCH (NETWORK FIRST + OFFLINE)
+// FETCH (offline support)
 self.addEventListener("fetch", event => {
+
+    // ❌ Skip POST (Firebase uses POST)
+    if (event.request.method !== "GET") return;
+
     event.respondWith(
-        fetch(event.request)
-            .then(res => {
-                return caches.open(CACHE_NAME).then(cache => {
-                    cache.put(event.request, res.clone());
-                    return res;
+        caches.match(event.request).then(res => {
+            return res || fetch(event.request).then(response => {
+                return caches.open("app-cache").then(cache => {
+                    cache.put(event.request, response.clone());
+                    return response;
                 });
-            })
-            .catch(() => caches.match(event.request))
+            });
+        })
     );
 });
 
-// 🔁 LISTEN FOR UPDATE COMMAND
+// UPDATE
 self.addEventListener("message", event => {
-    if (event.data && event.data.action === "skipWaiting") {
+    if (event.data.action === "skipWaiting") {
         self.skipWaiting();
     }
 });

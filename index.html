@@ -5,13 +5,38 @@
     <title>Atta Chakki Manager</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- STYLE -->
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+
+    <!-- ❌ TEMP REMOVE PWA (to avoid CORS issue) -->
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#ff6b00">
 
-    <!-- Firebase v8 -->
+    <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- ✅ LOAD CORE FIRST -->
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/firebase.js"></script>
+
+    <!-- HELPERS -->
+    <script src="js/utils.js"></script>
+
+    <!-- FEATURES -->
+    <script src="js/sales.js"></script>
+    <script src="js/pisai.js"></script>
+    <script src="js/purchase.js"></script>
+    <script src="js/expense.js"></script>
+    <script src="js/udhaar.js"></script>
+    <script src="js/ledger.js"></script>
+
+    <!-- UI -->
+    <script src="js/ui.js"></script>
+
+    <!-- ✅ APP LAST -->
+    <script src="js/app.js"></script>
 </head>
 
 <body>
@@ -25,26 +50,22 @@
     <!-- MAIN APP -->
     <div id="app"></div>
 
-    <!-- 📲 INSTALL BUTTON -->
+    <!-- INSTALL BUTTON -->
     <button id="installBtn" style="display:none; margin:10px;">
         📲 Install App
     </button>
 
-    <!-- 📒 UDHAAR POPUP (FIXED) -->
+    <!-- UDHAAR POPUP -->
     <div id="udharPopup" class="popup">
         <div class="popup-box">
             <h3>📒 Add Udhaar</h3>
 
-            <!-- 🔍 SEARCH OR ADD NEW -->
             <input list="popupCustomerList" id="newCustomerName" placeholder="Search or Add Customer"
                 oninput="autoFillPhone('newCustomerName','newCustomerPhone')">
 
             <datalist id="popupCustomerList"></datalist>
 
-            <!-- 📱 PHONE -->
             <input id="newCustomerPhone" placeholder="Phone Number">
-
-            <!-- 💰 AMOUNT -->
             <input id="popupAmount" placeholder="Amount">
 
             <br><br>
@@ -62,10 +83,8 @@
         <button onclick="setPage('expense')">💸<br>Exp</button>
         <button onclick="setPage('udhaar')">📒<br>Udhaar</button>
         <button onclick="setPage('ledger')">📊<br>Ledger</button>
+        <button onclick="setPage('history')">📜<br>History</button>
     </div>
-
-    <!-- SCRIPT -->
-    <script src="script.js"></script>
 
 </body>
 
