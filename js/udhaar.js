@@ -1,3 +1,10 @@
+// ===================== GLOBAL =====================
+let currentCollectName = "";
+let currentCollectPhone = "";
+let currentCollectAmount = 0;
+
+
+// ===================== RENDER UDHAAR =====================
 function renderUdhaarPage() {
 
     let grouped = {};
@@ -12,67 +19,27 @@ function renderUdhaarPage() {
                 name: u.name,
                 phone: u.phone,
                 date,
-
-                saleAmount: 0,
-                salePkt: 0,
-                saleKg: 0,
-                saleRate: 0,
-
-                pisaiAmount: 0,
-                pisaiKg: 0,
-                pisaiRate: 1.90,
-
-                puranaAmount: 0
+                total: 0
             };
         }
 
-        if (u.type === "sale") {
-            grouped[key].saleAmount += Number(u.amount);
-            grouped[key].salePkt += Number(u.pkt || 0);
-            grouped[key].saleKg += Number(u.kg || 0);
-            grouped[key].saleRate = u.rate || 0;
-        }
-
-        else if (u.type === "pisai") {
-            grouped[key].pisaiAmount += Number(u.amount);
-            grouped[key].pisaiKg += Number(u.kg || 0);
-        }
-
-        else if (u.type === "manual") { // ✅ FIX
-            grouped[key].puranaAmount += Number(u.amount);
-        }
+        grouped[key].total += Number(u.amount || 0);
     });
 
     let totalUdhaarAll = 0;
 
     Object.values(grouped).forEach(g => {
-        totalUdhaarAll += (g.saleAmount + g.pisaiAmount + g.puranaAmount);
+        totalUdhaarAll += g.total;
     });
 
     let list = Object.values(grouped).map(g => {
 
-        let total = g.saleAmount + g.pisaiAmount + g.puranaAmount;
-
-        let details = [];
-
-        if (g.puranaAmount) {
-            details.push(`₹${g.puranaAmount}`);
-        }
-
-        if (g.saleAmount) {
-            details.push(`Sale ₹${g.saleAmount}`);
-        }
-
-        if (g.pisaiAmount) {
-            details.push(`Pisai ₹${g.pisaiAmount}`);
-        }
-
         return `
         <div class="udhaar-card">
-            
+
             <div class="row top">
                 <span>${g.name}</span>
-                <span class="amount">₹${total.toFixed(2)}</span>
+                <span class="amount">₹${g.total.toFixed(2)}</span>
             </div>
 
             <div class="row">
@@ -80,12 +47,17 @@ function renderUdhaarPage() {
                 <span>📞 ${g.phone || "-"}</span>
             </div>
 
-            <div style="font-size:13px;color:#555;">
-                ${details.join(" + ")}
-            </div>
-
             <div class="actions">
-                <button onclick="sendWhatsApp('${g.name}','${g.phone}',${total})">📲</button>
+
+                <button onclick="sendWhatsApp('${g.name}','${g.phone}',${g.total})">
+                    📲
+                </button>
+
+                <button onclick="openCollectPopup('${g.name}','${g.phone}',${g.total})"
+                    style="background:#16a34a;color:white;">
+                    💰
+                </button>
+
             </div>
 
         </div>
@@ -101,6 +73,9 @@ function renderUdhaarPage() {
         ${list || "<p>No Udhaar</p>"}
     `;
 }
+
+
+// ===================== SAVE UDHAAR =====================
 function savePopupUdhaar() {
 
     let name = document.getElementById("newCustomerName").value;
@@ -116,7 +91,7 @@ function savePopupUdhaar() {
         name,
         phone,
         amount,
-        type: "manual", // ✅ VERY IMPORTANT
+        type: "manual",
         date: new Date().toISOString()
     });
 
@@ -124,8 +99,7 @@ function savePopupUdhaar() {
         type: "udhaar",
         ref: "udhaar",
         index: udhaar.length - 1,
-        amount,
-        text: `📒 ${name} ₹${amount}`,
+        text: `📒 ${name} Udhaar ₹${amount}`,
         time: getDateTime()
     });
 
@@ -133,10 +107,136 @@ function savePopupUdhaar() {
     closePopup();
     render();
 }
+
+
+// ===================== UDHAAR POPUP =====================
 function openPopup() {
     document.getElementById("udharPopup").style.display = "flex";
 }
 
 function closePopup() {
     document.getElementById("udharPopup").style.display = "none";
+}
+
+
+// ===================== WHATSAPP =====================
+function sendWhatsApp(name, phone, amount) {
+
+    if (!phone) {
+        alert("No phone number");
+        return;
+    }
+
+    let msg = `Hello ${name},\nYour pending udhaar is ₹${amount}.\nPlease pay soon 🙏`;
+
+    let url = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank");
+}
+
+
+// ===================== OPEN COLLECT POPUP =====================
+function openCollectPopup(name, phone, amount) {
+
+    currentCollectName = name;
+    currentCollectPhone = phone;
+    currentCollectAmount = amount;
+
+    document.getElementById("collectName").value = name;
+    document.getElementById("collectPhone").value = phone;
+    document.getElementById("collectAmount").value = amount;
+
+    document.getElementById("collectPopup").style.display = "flex";
+}
+
+
+// ===================== CLOSE COLLECT POPUP =====================
+function closeCollectPopup() {
+    document.getElementById("collectPopup").style.display = "none";
+}
+
+
+// ===================== FULL PAYMENT =====================
+function collectFull() {
+
+    let name = currentCollectName;
+    let phone = currentCollectPhone;
+    let amount = currentCollectAmount;
+
+    // ✅ ADD PAYMENT
+    payments.push({
+        name,
+        phone,
+        paid: amount,
+        mode: "full",
+        date: new Date().toISOString()
+    });
+
+    // ❌ REMOVE ALL UDHAAR
+    udhaar = udhaar.filter(u => u.name !== name);
+
+    addLastEntry({
+        type: "payment",
+        ref: "payments",
+        index: payments.length - 1,
+        text: `🟢 ${name} Full Paid ₹${amount}`,
+        time: getDateTime()
+    });
+
+    saveData();
+    closeCollectPopup();
+    render();
+}
+
+
+// ===================== PARTIAL PAYMENT =====================
+function collectPartial() {
+
+    let name = currentCollectName;
+    let phone = currentCollectPhone;
+    let payAmount = parseFloat(document.getElementById("collectAmount").value) || 0;
+
+    if (!payAmount) {
+        alert("Enter amount");
+        return;
+    }
+
+    let remaining = payAmount;
+
+    for (let i = 0; i < udhaar.length; i++) {
+
+        let u = udhaar[i];
+
+        if (u.name === name && remaining > 0) {
+
+            if (u.amount <= remaining) {
+                remaining -= u.amount;
+                udhaar.splice(i, 1);
+                i--;
+            } else {
+                u.amount -= remaining;
+                remaining = 0;
+            }
+        }
+    }
+
+    // ✅ ADD PAYMENT
+    payments.push({
+        name,
+        phone,
+        paid: payAmount,
+        mode: "partial",
+        date: new Date().toISOString()
+    });
+
+    addLastEntry({
+        type: "payment",
+        ref: "payments",
+        index: payments.length - 1,
+        text: `🟢 ${name} Paid ₹${payAmount}`,
+        time: getDateTime()
+    });
+
+    saveData();
+    closeCollectPopup();
+    render();
 }

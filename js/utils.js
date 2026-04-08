@@ -35,10 +35,24 @@ function clearInputs(ids) {
 }
 
 function addLastEntry(entry) {
-    lastEntries.unshift(entry); // newest on top
-    if (lastEntries.length > 5) {
-        lastEntries.pop(); // keep only 5
+
+    // keep only last 5
+    if (lastEntries.length >= 5) {
+        lastEntries.shift();
     }
+
+    lastEntries.push({
+        type: entry.type,
+        ref: entry.ref,     // 🔥 important (sales, purchase, etc)
+        index: entry.index, // 🔥 important
+        name: entry.name || "",
+        phone: entry.phone || "",
+        kg: entry.kg || 0,
+        pkt: entry.pkt || 0,
+        amount: entry.amount || 0,
+        text: entry.text,
+        time: entry.time
+    });
 }
 
 window.calcPisai = function () {
@@ -67,45 +81,74 @@ function getDateTime() {
 }
 
 
-function deleteEntry(i) {
+let editIndex = null;
 
-    let e = lastEntries[i];
-    if (!e) return;
+function openEditPopup(index) {
+    let e = lastEntries[index];
 
-    if (e.ref === "sales") {
-        let item = sales[e.index];
-        if (item) {
-            stock += item.kg; // restore
-            sales.splice(e.index, 1);
-        }
+    editIndex = index;
+
+    document.getElementById("editName").value = e.name || "";
+    document.getElementById("editPhone").value = e.phone || "";
+    document.getElementById("editKg").value = e.kg || e.pkt || "";
+    document.getElementById("editAmount").value = e.amount || 0;
+
+    document.getElementById("editPopup").style.display = "flex";
+}
+
+function closeEditPopup() {
+    document.getElementById("editPopup").style.display = "none";
+}
+
+function updateEntry() {
+
+    if (editIndex === null) return;
+
+    let entry = lastEntries[editIndex];
+
+    let name = document.getElementById("editName").value;
+    let phone = document.getElementById("editPhone").value;
+    let kg = parseFloat(document.getElementById("editKg").value) || 0;
+    let amount = parseFloat(document.getElementById("editAmount").value) || 0;
+
+    // 🔁 UPDATE MAIN DATA
+    let dataArray = window[entry.ref]; // sales / purchase / udhaar / etc
+
+    if (dataArray && dataArray[entry.index]) {
+
+        let item = dataArray[entry.index];
+
+        item.name = name;
+        item.phone = phone;
+        item.amount = amount;
+
+        if ("kg" in item) item.kg = kg;
+        if ("pkt" in item) item.pkt = kg;
+
+        // ✅ update date (optional)
+        item.date = new Date().toISOString();
     }
 
-    if (e.ref === "purchase") {
-        let item = purchase[e.index];
-        if (item) {
-            stock -= item.kg;
-            purchase.splice(e.index, 1);
-        }
-    }
-
-    if (e.ref === "udhaar") {
-        udhaar.splice(e.index, 1);
-    }
-
-    if (e.ref === "expenses") {
-        expenses.splice(e.index, 1);
-    }
-
-    if (e.ref === "payments") {
-        payments.splice(e.index, 1);
-    }
-
-    if (e.ref === "pisai") {
-        pisai.splice(e.index, 1);
-    }
-
-    lastEntries.splice(i, 1);
+    // 🔁 UPDATE LAST ENTRY TEXT
+    entry.text = `✏️ ${name} ₹${amount}`;
+    entry.time = getDateTime();
 
     saveData();
+    closeEditPopup();
     render();
+}
+
+
+function sendWhatsApp(name, phone, amount) {
+
+    if (!phone) {
+        alert("No phone number");
+        return;
+    }
+
+    let msg = `Hello ${name},\nYour pending udhaar is ₹${amount}.\nPlease pay soon 🙏`;
+
+    let url = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
+
+    window.open(url, "_blank");
 }

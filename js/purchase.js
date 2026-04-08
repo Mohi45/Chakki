@@ -26,11 +26,10 @@ function addPurchase() {
         type: "purchase",
         ref: "purchase",
         index: purchase.length - 1,
-        kg: kg,
-        amount: amount,
-        text: `🛒 Purchase ${kg}kg @ ₹${rate}`,
-        time: getDateTime(),
-        date: now
+        kg,
+        amount,
+        text: `🔵 Purchase ${kg}kg ₹${amount}`,
+        time: getDateTime()
     });
 
     // ✅ SAVE

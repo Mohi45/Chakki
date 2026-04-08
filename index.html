@@ -74,6 +74,30 @@
         </div>
     </div>
 
+
+    <!-- 💰 COLLECT PAYMENT POPUP -->
+    <div id="collectPopup" class="popup">
+        <div class="popup-box">
+
+            <h3>💰 Collect Payment</h3>
+
+            <input id="collectName" readonly>
+            <input id="collectPhone" readonly>
+
+            <input id="collectAmount" placeholder="Enter Amount">
+
+            <br><br>
+
+            <button onclick="collectFull()">✅ Full</button>
+            <button onclick="collectPartial()">➗ Partial</button>
+            <button onclick="closeCollectPopup()" style="background:red;">
+                ❌ Cancel
+            </button>
+
+        </div>
+    </div>
+    </div>
+
     <!-- BOTTOM NAV -->
     <div class="bottom-nav">
         <button onclick="setPage('dashboard')">🏠<br>Home</button>
@@ -82,7 +106,6 @@
         <button onclick="setPage('purchase')">🛒<br>Buy</button>
         <button onclick="setPage('expense')">💸<br>Exp</button>
         <button onclick="setPage('udhaar')">📒<br>Udhaar</button>
-        <button onclick="setPage('ledger')">📊<br>Ledger</button>
         <button onclick="setPage('history')">📜<br>History</button>
     </div>
 

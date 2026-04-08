@@ -50,8 +50,8 @@ function render() {
                     </div>
                 </div>
 
-                <!-- DELETE BUTTON -->
-                <button onclick="deleteEntry(${i})"
+                <!-- Edit BUTTON -->
+                <button onclick="openEditPopup(${i})"
     style="
         background:#ff3b30;
         border:none;
@@ -73,7 +73,7 @@ function render() {
         cursor:pointer;
         flex-shrink:0; /* 🔥 IMPORTANT */
     ">
-    🗑
+    ✏️
 </button>
 
             </div>
@@ -340,13 +340,18 @@ function render() {
         }).join("");
 
         app.innerHTML = `
-        <div class="card">
-            <h3>📜 Full History</h3>
-            <button onclick="setPage('dashboard')">⬅ Back</button>
-        </div>
+<div class="card">
+    <h3>📜 Full History</h3>
 
-        ${html || "<p>No data</p>"}
-    `;
+    <input id="historySearch" placeholder="🔍 Search customer..."
+        oninput="renderHistory()"
+        style="margin-top:10px;">
+
+    <button onclick="setPage('dashboard')">⬅ Back</button>
+</div>
+
+${html} || "<p>No data</p>"
+`;
 
         return;
     }
@@ -405,3 +410,176 @@ window.deleteAllData = function () {
         });
 };
 
+
+//Seach on History Page
+
+let allDataCache = [];
+
+// ================= HISTORY MAIN =================
+function renderHistory() {
+
+    let app = document.getElementById("app");
+
+    function safeDate(d) {
+        let dt = new Date(d);
+        return isNaN(dt.getTime()) ? null : dt;
+    }
+
+    let all = [];
+
+    // ===== DATA =====
+    sales.forEach(s => {
+        all.push({
+            type: "sale",
+            name: s.name || "",
+            text: `💰 ${s.name} ${s.pkt ? s.pkt + "pkt" : s.kg + "kg"} ₹${s.amount}`,
+            date: s.date
+        });
+    });
+
+    pisai.forEach(p => {
+        all.push({
+            type: "pisai",
+            name: p.name || "",
+            text: `🟡 ${p.name} ${p.kg}kg ₹${p.amount}`,
+            date: p.date
+        });
+    });
+
+    udhaar.forEach(u => {
+        all.push({
+            type: "udhaar",
+            name: u.name || "",
+            text: `📒 ${u.name} ₹${u.amount}`,
+            date: u.date
+        });
+    });
+
+    payments.forEach(p => {
+        all.push({
+            type: "payment",
+            name: p.name || "",
+            text: `🟢 ${p.name} Paid ₹${p.paid}`,
+            date: p.date
+        });
+    });
+
+    expenses.forEach(e => {
+        all.push({
+            type: "expense",
+            name: e.type || "",
+            text: `🟣 ${e.type} ₹${e.amount}`,
+            date: e.date
+        });
+    });
+
+    purchase.forEach(p => {
+        all.push({
+            type: "purchase",
+            name: "purchase",
+            text: `🔵 Purchase ${p.kg}kg @ ₹${p.rate}`,
+            date: p.date
+        });
+    });
+
+    // ✅ SAVE CACHE
+    allDataCache = all;
+
+    // ✅ SORT
+    allDataCache.sort((a, b) => {
+        let da = safeDate(a.date);
+        let db = safeDate(b.date);
+        return (db ? db.getTime() : 0) - (da ? da.getTime() : 0);
+    });
+
+    // ✅ UI FIRST
+    app.innerHTML = `
+        <div class="card">
+            <h3>📜 Full History</h3>
+
+            <div style="display:flex; gap:8px; margin-top:10px;">
+
+                <input id="historySearch"
+                    placeholder="Search customer..."
+                    style="flex:1; padding:10px; border-radius:10px; border:1px solid #ccc;">
+
+                <button onclick="searchHistory()" 
+                    style="
+                        width:40px;
+                        height:40px;
+                        border-radius:10px;
+                        border:none;
+                        background:#ff6b00;
+                        color:white;
+                        font-size:16px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        cursor:pointer;
+                    ">
+                    🔍
+                </button>
+
+            </div>
+
+            <button onclick="setPage('dashboard')" style="margin-top:10px;">
+                ⬅ Back
+            </button>
+        </div>
+
+        <div id="historyList"></div>
+    `;
+
+    // ✅ NOW render list
+    renderHistoryList(allDataCache);
+}
+
+
+// ================= SEARCH BUTTON =================
+function searchHistory() {
+
+    let search = document.getElementById("historySearch").value.toLowerCase();
+
+    let filtered = allDataCache.filter(e =>
+        e.name.toLowerCase().includes(search) ||
+        e.text.toLowerCase().includes(search)
+    );
+
+    renderHistoryList(filtered);
+}
+
+
+// ================= RENDER LIST =================
+function renderHistoryList(data) {
+
+    function safeDate(d) {
+        let dt = new Date(d);
+        return isNaN(dt.getTime()) ? null : dt;
+    }
+
+    let html = data.map(e => {
+
+        let color = "#000";
+
+        if (e.type === "sale") color = "#e53935";
+        if (e.type === "pisai") color = "#fb8c00";
+        if (e.type === "payment") color = "#43a047";
+        if (e.type === "expense") color = "#8e24aa";
+        if (e.type === "purchase") color = "#1e88e5";
+        if (e.type === "udhaar") color = "#6d4c41";
+
+        let dt = safeDate(e.date);
+
+        return `
+        <div class="card" style="color:${color}; font-size:14px;">
+            ${e.text}<br>
+            <span style="color:#888; font-size:12px;">
+                ${dt ? dt.toLocaleString() : "Old Data"}
+            </span>
+        </div>
+        `;
+    }).join("");
+
+    document.getElementById("historyList").innerHTML =
+        html || "<p style='padding:10px;'>No results</p>";
+}

@@ -40,8 +40,15 @@ function addSale() {
 
         // 🔥 Add payment entry (for last 5 + received)
         addLastEntry({
-            type: "payment",
-            text: `🟢 ${name} Paid ₹${amount}`,
+            type: "sale",
+            ref: "sales",
+            index: sales.length - 1,
+            name,
+            phone,
+            kg,
+            pkt,
+            amount,
+            text: `💰 ${name} ${kg}kg ₹${amount}`,
             time: getDateTime()
         });
     }
@@ -55,12 +62,23 @@ function addSale() {
             name,
             phone,
             amount,
+            type: "sale",   // ✅ ADD THIS
+            pkt,
+            kg,
+            rate,
             date: new Date().toISOString()
         });
 
         addLastEntry({
-            type: "udhaar",
-            text: `📒 ${name} Udhaar ₹${amount}`,
+            type: "sale",
+            ref: "sales",
+            index: sales.length - 1,
+            name,
+            phone,
+            kg,
+            pkt,
+            amount,
+            text: `💰 ${name} ${kg}kg ₹${amount}`,
             time: getDateTime()
         });
     }
@@ -70,9 +88,12 @@ function addSale() {
         type: "sale",
         ref: "sales",
         index: sales.length - 1,
-        kg: kg,
-        amount: amount,
-        text: `💰 ${name} ${pkt}pkt ₹${amount}`,
+        name,
+        phone,
+        kg,
+        pkt,
+        amount,
+        text: `💰 ${name} ${kg}kg ₹${amount}`,
         time: getDateTime()
     });
 

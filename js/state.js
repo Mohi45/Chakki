@@ -1,3 +1,4 @@
+let received = 0;
 let sales = [];
 let expenses = [];
 let purchase = [];

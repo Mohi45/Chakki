@@ -1,4 +1,5 @@
 function addExpense() {
+
     let type = document.getElementById("type").value;
     let amt = parseFloat(document.getElementById("amt").value) || 0;
 
@@ -9,30 +10,30 @@ function addExpense() {
 
     let now = new Date().toISOString();
 
-    // ✅ SAVE EXPENSE (WITH DATE)
+    // ✅ SAVE EXPENSE
     expenses.push({
         type,
         amount: amt,
         date: now
     });
 
-    // ✅ ADD LAST ENTRY (WITH INDEX FOR DELETE)
+    // ✅ LAST ENTRY (FIXED)
     addLastEntry({
         type: "expense",
         ref: "expenses",
         index: expenses.length - 1,
-        amount: amt,
-        text: `💸 ${type} - ₹${amt}`,
-        time: getDateTime(),
-        date: now
+        amount: amt, // ✅ FIX
+        text: `🟣 ${type} ₹${amt}`, // ✅ FIX
+        time: getDateTime()
     });
 
-    // ✅ SAVE + REFRESH
+    // ✅ SAVE
     saveData();
 
-    // ✅ CLEAR INPUT
+    // ✅ CLEAR INPUTS (WILL WORK NOW)
     document.getElementById("type").value = "";
     document.getElementById("amt").value = "";
+    document.getElementById("type").focus(); // 🔥 better UX
 
     render();
 }

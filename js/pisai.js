@@ -10,7 +10,7 @@ function addPisai() {
         return;
     }
 
-    let amount = kg * 1.90;
+    let amount = (kg * 1.90).toFixed(2);;
 
     // ✅ Save pisai
     pisai.push({
@@ -32,9 +32,11 @@ function addPisai() {
         type: "pisai",
         ref: "pisai",
         index: pisai.length - 1,
-        kg: kg,
-        amount: amount,
-        text: `🌾 ${name} ${kg}kg ₹${amount}`,
+        name,
+        phone,
+        kg,
+        amount,
+        text: `🟡 ${name} ${kg}kg ₹${amount}`,
         time: getDateTime()
     });
 
@@ -43,12 +45,22 @@ function addPisai() {
         udhaar.push({
             name,
             phone,
-            amount
+            amount,
+            type: "pisai",  // ✅ ADD THIS
+            kg,
+            rate: 1.90,
+            date: new Date().toISOString()
         });
 
         addLastEntry({
-            type: "udhaar",
-            text: `📒 ${name} Pisai Udhaar ₹${amount.toFixed(2)}`,
+            type: "pisai",
+            ref: "pisai",
+            index: pisai.length - 1,
+            name,
+            phone,
+            kg,
+            amount,
+            text: `🟡 ${name} ${kg}kg ₹${amount}`,
             time: getDateTime()
         });
     }

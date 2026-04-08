@@ -9,8 +9,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 
-// 🔥 LIVE SYNC (REALTIME)
+// ===================== LIVE SYNC =====================
 function startLiveSync() {
+
     db.collection("data").doc("main")
         .onSnapshot((doc) => {
 
@@ -22,54 +23,46 @@ function startLiveSync() {
             }
 
             let d = doc.data();
-            console.log("📦 Firebase Data:", d);
 
-            // ✅ LOAD ALL DATA
-            sales = d.sales || [];
-            expenses = d.expenses || [];
-            purchase = d.purchase || [];
-            udhaar = d.udhaar || [];
-            pisai = d.pisai || [];
-            payments = d.payments || [];
+            // ✅ LOAD ALL DATA SAFELY
+            sales = Array.isArray(d.sales) ? d.sales : [];
+            expenses = Array.isArray(d.expenses) ? d.expenses : [];
+            purchase = Array.isArray(d.purchase) ? d.purchase : [];
+            udhaar = Array.isArray(d.udhaar) ? d.udhaar : [];
+            pisai = Array.isArray(d.pisai) ? d.pisai : [];
+            payments = Array.isArray(d.payments) ? d.payments : [];
+            lastEntries = Array.isArray(d.lastEntries) ? d.lastEntries : [];
+
             stock = Number(d.stock || 0);
 
-            // ✅ IMPORTANT (FIXED)
-            lastEntries = d.lastEntries || [];
+            console.log("📦 Data Loaded:", d);
 
-            console.log("✅ Stock Loaded:", stock);
-
-            render(); // 🔥 UPDATE UI
+            render(); // 🔥 UI UPDATE
         }, (error) => {
             console.error("❌ Firestore Error:", error);
         });
 }
 
 
-// 🔥 SAVE DATA (SAFE)
+// ===================== SAVE DATA =====================
 function saveData() {
 
-    // 🛡️ Prevent empty overwrite
-    if (
-        !sales && !expenses && !purchase &&
-        !udhaar && !pisai && !payments
-    ) {
-        console.warn("⚠️ Prevented empty save");
-        return;
-    }
+    let data = {
+        sales,
+        expenses,
+        purchase,
+        udhaar,
+        pisai,
+        payments,
+        stock: Number(stock),
+        lastEntries
+    };
 
+    console.log("💾 Saving Data:", data);
+
+    // ❌ REMOVE merge:true → FULL REPLACE
     db.collection("data").doc("main")
-        .set({
-            sales,
-            expenses,
-            purchase,
-            udhaar,
-            pisai,
-            payments,
-            stock: Number(stock),
-
-            // ✅ IMPORTANT (FIXED)
-            lastEntries
-        }, { merge: true })
+        .set(data)
         .then(() => {
             console.log("✅ Data Saved");
         })
