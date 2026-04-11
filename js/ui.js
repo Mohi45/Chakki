@@ -12,12 +12,12 @@ function render() {
                 let color = "#333";
                 let icon = "•";
 
-                if (e.type === "sale") { color = "#e53935"; icon = "🔴"; }
-                if (e.type === "pisai") { color = "#fb8c00"; icon = "🟡"; }
-                if (e.type === "payment") { color = "#43a047"; icon = "🟢"; }
-                if (e.type === "expense") { color = "#8e24aa"; icon = "🟣"; }
-                if (e.type === "purchase") { color = "#1e88e5"; icon = "🔵"; }
-                if (e.type === "udhaar") { color = "#6d4c41"; icon = "📒"; }
+                if (e.type === "sale") { color = "#e53935"; }
+                if (e.type === "pisai") { color = "#fb8c00"; }
+                if (e.type === "payment") { color = "#43a047"; }
+                if (e.type === "expense") { color = "#8e24aa"; }
+                if (e.type === "purchase") { color = "#1e88e5"; }
+                if (e.type === "udhaar") { color = "#6d4c41"; }
 
                 return `
             <div style="
@@ -94,8 +94,12 @@ function render() {
     let totalCustomers = getCustomers().length;
     let totalPisaiKg = pisai.reduce((a, b) => a + (b.kg || 0), 0);
     let pisaiIncome = totalPisaiKg * 1.90;
-    let totalUdhaar = udhaar.reduce((a, b) => a + (b.amount || 0), 0);
-    let received = payments.reduce((a, b) => a + (b.paid || 0), 0);
+    let totalUdhaar = udhaar.reduce((a, b) => {
+        return a + Number(b.amount || 0);
+    }, 0);
+    let received = payments.reduce((a, b) => {
+        return a + Number(b.paid || 0);
+    }, 0);
 
     let alertBox = stock < LOW_STOCK_LIMIT
         ? `<div class='alert blink'>⚠️ Low Stock ${stock}kg</div>`
@@ -117,7 +121,9 @@ function render() {
 
     // SOLD DATA
     let soldKg = sales.reduce((a, b) => a + (b.kg || 0), 0);
-    let totalSales = sales.reduce((a, b) => a + (b.amount || 0), 0);
+    let totalSales = sales.reduce((a, b) => {
+        return a + Number(b.amount || 0);
+    }, 0);
 
     // ✅ REAL COST OF SOLD STOCK
     let costOfSold = costPerKg * soldKg;
@@ -131,7 +137,11 @@ function render() {
 
         <div class="dashboard">
             <div class="card stat">Customers<h3>${totalCustomers}</h3></div>
-            <div class="card stat">Stock<h3>${stock}kg</h3></div>
+        <div class="card stat">
+    Stock
+    <h3>${formatKg(stock)}</h3>
+    <small>(${stock} kg)</small>
+</div>
             <div class="card stat">Sales<h3>₹${totalSales.toFixed(2)}</h3></div>
             <div class="card stat">Expense<h3>₹${totalExp.toFixed(2)}</h3></div>
             <div class="card stat">Pisai<h3>₹${pisaiIncome.toFixed(2)}</h3></div>
@@ -350,7 +360,7 @@ function render() {
     <button onclick="setPage('dashboard')">⬅ Back</button>
 </div>
 
-${html} || "<p>No data</p>"
+${html}
 `;
 
         return;

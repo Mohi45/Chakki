@@ -1,6 +1,10 @@
 function addPurchase() {
-    let kg = parseFloat(document.getElementById("kg").value) || 0;
-    let rate = parseFloat(document.getElementById("rate").value) || 0;
+
+    let kgInput = document.getElementById("kg");
+    let rateInput = document.getElementById("rate");
+
+    let kg = parseFloat(kgInput.value) || 0;
+    let rate = parseFloat(rateInput.value) || 0;
 
     if (!kg || !rate) {
         alert("⚠️ Enter kg & rate");
@@ -8,36 +12,30 @@ function addPurchase() {
     }
 
     let amount = kg * rate;
-    let now = new Date().toISOString();
 
-    // ✅ SAVE PURCHASE (WITH DATE)
     purchase.push({
         kg,
         rate,
         amount,
-        date: now
+        date: new Date().toISOString()
     });
 
-    // ✅ UPDATE STOCK
+    // ✅ ADD STOCK
     stock += kg;
 
-    // ✅ ADD LAST ENTRY (WITH DATE + INDEX)
     addLastEntry({
         type: "purchase",
         ref: "purchase",
         index: purchase.length - 1,
         kg,
         amount,
-        text: `🔵 Purchase ${kg}kg ₹${amount}`,
+        text: `🔵 ${formatKg(kg)} @ ₹${rate} = ₹${amount}`,
         time: getDateTime()
     });
 
-    // ✅ SAVE
     saveData();
 
-    // ✅ CLEAR INPUTS
-    document.getElementById("kg").value = "";
-    document.getElementById("rate").value = "";
-
-    render();
+    // ✅ CLEAR INPUT
+    kgInput.value = "";
+    rateInput.value = "";
 }

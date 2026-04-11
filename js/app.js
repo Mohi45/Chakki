@@ -1,3 +1,4 @@
+let isDataLoaded = false;
 window.onload = function () {
     startLiveSync();
 };

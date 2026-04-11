@@ -23,7 +23,7 @@ function addExpense() {
         ref: "expenses",
         index: expenses.length - 1,
         amount: amt, // ✅ FIX
-        text: `🟣 ${type} ₹${amt}`, // ✅ FIX
+        text: `💸 ${type} ₹${amt}`, // ✅ FIX
         time: getDateTime()
     });
 

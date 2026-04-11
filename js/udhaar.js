@@ -11,53 +11,97 @@ function renderUdhaarPage() {
 
     udhaar.forEach(u => {
 
-        let date = u.date ? new Date(u.date).toLocaleDateString() : "No Date";
-        let key = u.name + "_" + date;
+        let key = u.name;
 
         if (!grouped[key]) {
             grouped[key] = {
                 name: u.name,
                 phone: u.phone,
-                date,
-                total: 0
+                sales: [],
+                pisai: [],
+                manual: []
             };
         }
 
-        grouped[key].total += Number(u.amount || 0);
+        if (u.phone) grouped[key].phone = u.phone;
+
+        if (u.type === "sale") {
+            grouped[key].sales.push(u);
+        }
+
+        else if (u.type === "pisai") {
+            grouped[key].pisai.push(u);
+        }
+
+        else {
+            grouped[key].manual.push(u);
+        }
     });
 
     let totalUdhaarAll = 0;
 
-    Object.values(grouped).forEach(g => {
-        totalUdhaarAll += g.total;
-    });
-
     let list = Object.values(grouped).map(g => {
+
+        let total = 0;
+        let details = [];
+
+        // 🔴 SALES DETAILS
+        g.sales.forEach(s => {
+            let pkt = Number(s.pkt || 0);
+            let kg = Number(s.kg || 0);
+            let rate = Number(s.rate || 0);
+            let amt = Number(s.amount || 0);
+
+            total += amt;
+
+            let perPktKg = pkt ? (kg / pkt) : kg;
+
+            details.push(`🔴 ${perPktKg}kg × ${pkt}pkt @ ₹${rate} = ₹${amt}`);
+        });
+
+        // 🟡 PISAI DETAILS
+        g.pisai.forEach(p => {
+            let kg = Number(p.kg || 0);
+            let rate = 1.90;
+            let amt = Number(p.amount || 0);
+
+            total += amt;
+
+            details.push(`🟡 ${kg}kg × ₹${rate} = ₹${amt}`);
+        });
+
+        // 📒 MANUAL
+        g.manual.forEach(m => {
+            let amt = Number(m.amount || 0);
+            total += amt;
+            details.push(`📒 ₹${amt}`);
+        });
+
+        totalUdhaarAll += total;
 
         return `
         <div class="udhaar-card">
 
             <div class="row top">
                 <span>${g.name}</span>
-                <span class="amount">₹${g.total.toFixed(2)}</span>
+                <span class="amount">₹${total.toFixed(2)}</span>
             </div>
 
             <div class="row">
-                <span>📅 ${g.date}</span>
                 <span>📞 ${g.phone || "-"}</span>
             </div>
 
+            <div style="font-size:13px;color:#555; margin-top:6px;">
+                ${details.join("<br>")}
+            </div>
+
             <div class="actions">
+                <button onclick="sendWhatsApp('${g.name}','${g.phone}')">📲</button>
 
-                <button onclick="sendWhatsApp('${g.name}','${g.phone}',${g.total})">
-                    📲
-                </button>
-
-                <button onclick="openCollectPopup('${g.name}','${g.phone}',${g.total})"
+                <button onclick="openCollectPopup('${g.name}','${g.phone}',${total})"
                     style="background:#16a34a;color:white;">
                     💰
                 </button>
-
             </div>
 
         </div>
@@ -120,16 +164,61 @@ function closePopup() {
 
 
 // ===================== WHATSAPP =====================
-function sendWhatsApp(name, phone, amount) {
+function sendWhatsApp(name, phone) {
 
     if (!phone) {
         alert("No phone number");
         return;
     }
 
-    let msg = `Hello ${name},\nYour pending udhaar is ₹${amount}.\nPlease pay soon 🙏`;
+    let customerData = udhaar.filter(u => u.name === name);
+
+    let today = new Date();
+    let dueDate = today.toLocaleDateString(); // 📅 current date
+
+    let msg = `Hello ${name},\n\n📒 Your Udhaar Details:\n\n`;
+
+    let total = 0;
+
+    customerData.forEach(u => {
+
+        if (u.type === "sale") {
+            let pkt = Number(u.pkt || 0);
+            let kg = Number(u.kg || 0);
+            let rate = Number(u.rate || 0);
+            let amt = Number(u.amount || 0);
+
+            total += amt;
+
+            let perPktKg = pkt ? (kg / pkt) : kg;
+
+            msg += `🔴 ${perPktKg}kg × ${pkt}pkt @ ₹${rate} = ₹${amt}\n`;
+        }
+
+        else if (u.type === "pisai") {
+            let kg = Number(u.kg || 0);
+            let rate = 1.90;
+            let amt = Number(u.amount || 0);
+
+            total += amt;
+
+            msg += `🟡 ${kg}kg × ₹${rate} = ₹${amt}\n`;
+        }
+
+        else {
+            let amt = Number(u.amount || 0);
+            total += amt;
+
+            msg += `📒 ₹${amt}\n`;
+        }
+    });
+
+    msg += `\n💰 Total Udhaar: ₹${total.toFixed(2)}\n`;
+    msg += `📅 Due Date: ${dueDate}\n\n`;
+    msg += `Please pay soon 🙏`;
 
     let url = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
+
     window.open(url, "_blank");
 }
 

@@ -16,7 +16,7 @@ function addSale() {
     }
 
     // ✅ CALCULATIONS
-    let kg = type * pkt;          // total kg
+    let kg = pkt;          // total kg
     let amount = pkt * rate;      // ✅ packet based pricing (FIXED)
 
     // ✅ SAVE SALE
@@ -93,7 +93,9 @@ function addSale() {
         kg,
         pkt,
         amount,
-        text: `💰 ${name} ${kg}kg ₹${amount}`,
+
+        text: `🔴 ${kg}kg × ${pkt}pkt @ ₹${rate} = ₹${amount}`,
+
         time: getDateTime()
     });
 

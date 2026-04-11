@@ -152,3 +152,16 @@ function sendWhatsApp(name, phone, amount) {
 
     window.open(url, "_blank");
 }
+function formatKg(kg) {
+    kg = Number(kg || 0);
+
+    let quintal = Math.floor(kg / 100);
+    let remainingKg = kg % 100;
+
+    let result = "";
+
+    if (quintal) result += `${quintal} quintal `;
+    if (remainingKg) result += `${remainingKg} kg`;
+
+    return result || "0 kg";
+}

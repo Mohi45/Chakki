@@ -24,7 +24,7 @@ function startLiveSync() {
 
             let d = doc.data();
 
-            // ✅ LOAD ALL DATA SAFELY
+            // ✅ LOAD SAFE ARRAYS
             sales = Array.isArray(d.sales) ? d.sales : [];
             expenses = Array.isArray(d.expenses) ? d.expenses : [];
             purchase = Array.isArray(d.purchase) ? d.purchase : [];
@@ -33,40 +33,34 @@ function startLiveSync() {
             payments = Array.isArray(d.payments) ? d.payments : [];
             lastEntries = Array.isArray(d.lastEntries) ? d.lastEntries : [];
 
-            stock = Number(d.stock || 0);
+            // 🔥 AUTO CALCULATE STOCK (REAL FIX)
+            let totalPurchaseKg = purchase.reduce((a, b) => a + Number(b.kg || 0), 0);
+            let totalSoldKg = sales.reduce((a, b) => a + Number(b.kg || 0), 0);
 
-            console.log("📦 Data Loaded:", d);
+            stock = totalPurchaseKg - totalSoldKg;
 
-            render(); // 🔥 UI UPDATE
+            console.log("📦 Stock Calculated:", stock);
+
+            render();
         }, (error) => {
             console.error("❌ Firestore Error:", error);
         });
 }
 
-
 // ===================== SAVE DATA =====================
 function saveData() {
 
-    let data = {
-        sales,
-        expenses,
-        purchase,
-        udhaar,
-        pisai,
-        payments,
-        stock: Number(stock),
-        lastEntries
-    };
-
-    console.log("💾 Saving Data:", data);
-
-    // ❌ REMOVE merge:true → FULL REPLACE
     db.collection("data").doc("main")
-        .set(data)
-        .then(() => {
-            console.log("✅ Data Saved");
-        })
-        .catch(err => {
-            console.error("❌ Save Error:", err);
-        });
+        .set({
+            sales,
+            expenses,
+            purchase,
+            udhaar,
+            pisai,
+            payments,
+            stock: Number(stock),
+            lastEntries
+        }, { merge: true }) // ✅ IMPORTANT
+        .then(() => console.log("✅ Saved"))
+        .catch(err => console.error(err));
 }
