@@ -29,7 +29,7 @@ function addPurchase() {
         index: purchase.length - 1,
         kg,
         amount,
-        text: `🔵 ${formatKg(kg)} @ ₹${rate} = ₹${amount}`,
+        text: `🛒 ${formatKg(kg)} @ ₹${rate} = ₹${amount}`,
         time: getDateTime()
     });
 

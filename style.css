@@ -26,7 +26,7 @@ body {
     background: var(--bg);
     color: var(--text);
     padding: 10px;
-    padding-bottom: 90px;
+    padding-bottom: 130px;
 }
 
 /* HEADER */
@@ -50,9 +50,22 @@ body {
 
 .title {
     flex: 1;
-    text-align: center;
+    text-align: left;
     font-size: 16px;
     font-weight: bold;
+}
+
+.header-toggle {
+    width: auto;
+    min-width: 84px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    font-size: 14px;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
 }
 
 /* DASHBOARD */
@@ -193,6 +206,13 @@ button:active {
     width: 95%;
     margin: 10px auto;
     display: block;
+}
+
+.app-footer {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    padding: 10px 12px 78px;
 }
 
 /* BOTTOM NAV */

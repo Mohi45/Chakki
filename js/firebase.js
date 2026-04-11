@@ -35,7 +35,7 @@ function startLiveSync() {
 
             // 🔥 AUTO CALCULATE STOCK (REAL FIX)
             let totalPurchaseKg = purchase.reduce((a, b) => a + Number(b.kg || 0), 0);
-            let totalSoldKg = sales.reduce((a, b) => a + Number(b.kg || 0), 0);
+            let totalSoldKg = sales.reduce((a, b) => a + (Number(b.kg || 0) * Number(b.pkt || 0)), 0);
 
             stock = totalPurchaseKg - totalSoldKg;
 

@@ -1,6 +1,6 @@
 function addPisai() {
     let name = document.getElementById("pisaiName").value;
-    let phone = document.getElementById("pisaiPhone").value;
+    let phone = normalizePhone(document.getElementById("pisaiPhone").value);
 
     let kg = parseFloat(document.getElementById("pisaiKg").value) || 0;
     let pay = document.getElementById("pisaiPay").value;
@@ -10,24 +10,30 @@ function addPisai() {
         return;
     }
 
-    let amount = (kg * 1.90).toFixed(2);;
+    if (!validatePhoneOrAlert(phone)) {
+        return;
+    }
 
-    // ✅ Save pisai
+    let amount = (kg * 1.90).toFixed(2);
+    let now = new Date().toISOString();
+
     pisai.push({
         name,
         phone,
         kg,
         amount,
-        pay
+        pay,
+        date: now
     });
+
     if (pay === "instant") {
         payments.push({
             name,
             paid: amount,
-            date: new Date().toISOString()
+            date: now
         });
     }
-    // ✅ ALWAYS ADD PISAI ENTRY (FIXED)
+
     addLastEntry({
         type: "pisai",
         ref: "pisai",
@@ -36,39 +42,24 @@ function addPisai() {
         phone,
         kg,
         amount,
-        text: `🟡 ${name} ${kg}kg ₹${amount}`,
+        text: `🌾 ${name} ${kg}kg ₹${amount}`,
         time: getDateTime()
     });
 
-    // 🔥 ONLY IF UDHAAR
     if (pay === "udhaar") {
         udhaar.push({
             name,
             phone,
             amount,
-            type: "pisai",  // ✅ ADD THIS
+            type: "pisai",
             kg,
             rate: 1.90,
-            date: new Date().toISOString()
-        });
-
-        addLastEntry({
-            type: "pisai",
-            ref: "pisai",
-            index: pisai.length - 1,
-            name,
-            phone,
-            kg,
-            amount,
-            text: `🟡 ${name} ${kg}kg ₹${amount}`,
-            time: getDateTime()
+            date: now
         });
     }
 
-    // ✅ SAVE
     saveData();
 
-    // ✅ CLEAR INPUTS
     document.getElementById("pisaiName").value = "";
     document.getElementById("pisaiPhone").value = "";
     document.getElementById("pisaiKg").value = "";

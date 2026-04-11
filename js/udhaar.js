@@ -1,16 +1,11 @@
-// ===================== GLOBAL =====================
 let currentCollectName = "";
 let currentCollectPhone = "";
 let currentCollectAmount = 0;
 
-
-// ===================== RENDER UDHAAR =====================
 function renderUdhaarPage() {
-
     let grouped = {};
 
     udhaar.forEach(u => {
-
         let key = u.name;
 
         if (!grouped[key]) {
@@ -27,13 +22,9 @@ function renderUdhaarPage() {
 
         if (u.type === "sale") {
             grouped[key].sales.push(u);
-        }
-
-        else if (u.type === "pisai") {
+        } else if (u.type === "pisai") {
             grouped[key].pisai.push(u);
-        }
-
-        else {
+        } else {
             grouped[key].manual.push(u);
         }
     });
@@ -41,11 +32,9 @@ function renderUdhaarPage() {
     let totalUdhaarAll = 0;
 
     let list = Object.values(grouped).map(g => {
-
         let total = 0;
         let details = [];
 
-        // 🔴 SALES DETAILS
         g.sales.forEach(s => {
             let pkt = Number(s.pkt || 0);
             let kg = Number(s.kg || 0);
@@ -53,24 +42,18 @@ function renderUdhaarPage() {
             let amt = Number(s.amount || 0);
 
             total += amt;
-
-            let perPktKg = pkt ? (kg / pkt) : kg;
-
-            details.push(`🔴 ${perPktKg}kg × ${pkt}pkt @ ₹${rate} = ₹${amt}`);
+            details.push(`🔴 ${kg}kg × ${pkt}pkt @ ₹${rate} = ₹${amt}`);
         });
 
-        // 🟡 PISAI DETAILS
         g.pisai.forEach(p => {
             let kg = Number(p.kg || 0);
             let rate = 1.90;
             let amt = Number(p.amount || 0);
 
             total += amt;
-
             details.push(`🟡 ${kg}kg × ₹${rate} = ₹${amt}`);
         });
 
-        // 📒 MANUAL
         g.manual.forEach(m => {
             let amt = Number(m.amount || 0);
             total += amt;
@@ -81,7 +64,6 @@ function renderUdhaarPage() {
 
         return `
         <div class="udhaar-card">
-
             <div class="row top">
                 <span>${g.name}</span>
                 <span class="amount">₹${total.toFixed(2)}</span>
@@ -97,13 +79,11 @@ function renderUdhaarPage() {
 
             <div class="actions">
                 <button onclick="sendWhatsApp('${g.name}','${g.phone}')">📲</button>
-
                 <button onclick="openCollectPopup('${g.name}','${g.phone}',${total})"
                     style="background:#16a34a;color:white;">
                     💰
                 </button>
             </div>
-
         </div>
         `;
     }).join("");
@@ -118,16 +98,17 @@ function renderUdhaarPage() {
     `;
 }
 
-
-// ===================== SAVE UDHAAR =====================
 function savePopupUdhaar() {
-
     let name = document.getElementById("newCustomerName").value;
-    let phone = document.getElementById("newCustomerPhone").value;
+    let phone = normalizePhone(document.getElementById("newCustomerPhone").value);
     let amount = parseFloat(document.getElementById("popupAmount").value) || 0;
 
     if (!name || !amount) {
         alert("⚠️ Fill details");
+        return;
+    }
+
+    if (!validatePhoneOrAlert(phone)) {
         return;
     }
 
@@ -152,8 +133,6 @@ function savePopupUdhaar() {
     render();
 }
 
-
-// ===================== UDHAAR POPUP =====================
 function openPopup() {
     document.getElementById("udharPopup").style.display = "flex";
 }
@@ -162,26 +141,19 @@ function closePopup() {
     document.getElementById("udharPopup").style.display = "none";
 }
 
-
-// ===================== WHATSAPP =====================
 function sendWhatsApp(name, phone) {
-
     if (!phone) {
         alert("No phone number");
         return;
     }
 
     let customerData = udhaar.filter(u => u.name === name);
-
     let today = new Date();
-    let dueDate = today.toLocaleDateString(); // 📅 current date
-
+    let dueDate = today.toLocaleDateString();
     let msg = `Hello ${name},\n\n📒 Your Udhaar Details:\n\n`;
-
     let total = 0;
 
     customerData.forEach(u => {
-
         if (u.type === "sale") {
             let pkt = Number(u.pkt || 0);
             let kg = Number(u.kg || 0);
@@ -189,26 +161,17 @@ function sendWhatsApp(name, phone) {
             let amt = Number(u.amount || 0);
 
             total += amt;
-
-            let perPktKg = pkt ? (kg / pkt) : kg;
-
-            msg += `🔴 ${perPktKg}kg × ${pkt}pkt @ ₹${rate} = ₹${amt}\n`;
-        }
-
-        else if (u.type === "pisai") {
+            msg += `📒 ${kg}kg × ${pkt}pkt @ ₹${rate} = ₹${amt}\n`;
+        } else if (u.type === "pisai") {
             let kg = Number(u.kg || 0);
             let rate = 1.90;
             let amt = Number(u.amount || 0);
 
             total += amt;
-
-            msg += `🟡 ${kg}kg × ₹${rate} = ₹${amt}\n`;
-        }
-
-        else {
+            msg += `🌾 ${kg}kg × ₹${rate} = ₹${amt}\n`;
+        } else {
             let amt = Number(u.amount || 0);
             total += amt;
-
             msg += `📒 ₹${amt}\n`;
         }
     });
@@ -218,14 +181,10 @@ function sendWhatsApp(name, phone) {
     msg += `Please pay soon 🙏`;
 
     let url = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
-
     window.open(url, "_blank");
 }
 
-
-// ===================== OPEN COLLECT POPUP =====================
 function openCollectPopup(name, phone, amount) {
-
     currentCollectName = name;
     currentCollectPhone = phone;
     currentCollectAmount = amount;
@@ -233,25 +192,18 @@ function openCollectPopup(name, phone, amount) {
     document.getElementById("collectName").value = name;
     document.getElementById("collectPhone").value = phone;
     document.getElementById("collectAmount").value = amount;
-
     document.getElementById("collectPopup").style.display = "flex";
 }
 
-
-// ===================== CLOSE COLLECT POPUP =====================
 function closeCollectPopup() {
     document.getElementById("collectPopup").style.display = "none";
 }
 
-
-// ===================== FULL PAYMENT =====================
 function collectFull() {
-
     let name = currentCollectName;
     let phone = currentCollectPhone;
     let amount = currentCollectAmount;
 
-    // ✅ ADD PAYMENT
     payments.push({
         name,
         phone,
@@ -260,7 +212,6 @@ function collectFull() {
         date: new Date().toISOString()
     });
 
-    // ❌ REMOVE ALL UDHAAR
     udhaar = udhaar.filter(u => u.name !== name);
 
     addLastEntry({
@@ -276,10 +227,7 @@ function collectFull() {
     render();
 }
 
-
-// ===================== PARTIAL PAYMENT =====================
 function collectPartial() {
-
     let name = currentCollectName;
     let phone = currentCollectPhone;
     let payAmount = parseFloat(document.getElementById("collectAmount").value) || 0;
@@ -292,11 +240,9 @@ function collectPartial() {
     let remaining = payAmount;
 
     for (let i = 0; i < udhaar.length; i++) {
-
         let u = udhaar[i];
 
         if (u.name === name && remaining > 0) {
-
             if (u.amount <= remaining) {
                 remaining -= u.amount;
                 udhaar.splice(i, 1);
@@ -308,7 +254,6 @@ function collectPartial() {
         }
     }
 
-    // ✅ ADD PAYMENT
     payments.push({
         name,
         phone,
