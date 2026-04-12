@@ -167,15 +167,21 @@ function normalizePhone(phone) {
 
 function isValidPhone(phone) {
     const normalized = normalizePhone(phone);
-    return normalized === "" || /^[6-9]\d{9}$/.test(normalized);
+    return /^[6-9]\d{9}$/.test(normalized);
 }
 
 function validatePhoneOrAlert(phone) {
     if (isValidPhone(phone)) return true;
 
+    const normalized = normalizePhone(phone);
+
     alert(lang === "hi"
-        ? "सही 10 अंकों का मोबाइल नंबर डालें"
-        : "Enter a valid 10-digit mobile number");
+        ? (normalized
+            ? "सही 10 अंकों का मोबाइल नंबर डालें"
+            : "फोन नंबर जरूरी है")
+        : (normalized
+            ? "Enter a valid 10-digit mobile number"
+            : "Phone number is required"));
     return false;
 }
 
@@ -420,6 +426,27 @@ function sendWhatsApp(name, phone, amount) {
     window.open(url, "_blank");
 }
 
+function getCustomerPendingUdhaarAmount(name) {
+    let normalizedName = normalizeCustomerName(name);
+    if (!normalizedName) return 0;
+
+    return udhaar
+        .filter(u => normalizeCustomerName(u.name) === normalizedName)
+        .reduce((total, u) => total + Number(u.amount || 0), 0);
+}
+
+function confirmUdhaarBeforeContinue(name) {
+    let pendingAmount = getCustomerPendingUdhaarAmount(name);
+    if (!pendingAmount) return true;
+
+    let customerName = getCustomerDisplayName(name) || formatCustomerName(name) || "Customer";
+    let message = lang === "hi"
+        ? `${customerName} का पहले से उधार ₹${pendingAmount.toFixed(2)} है.\n\nकृपया पहले उधार चुकाएं.\n\nजारी रखने के लिए OK दबाएं, रुकने के लिए Cancel दबाएं।`
+        : `${customerName} already has pending udhaar of ₹${pendingAmount.toFixed(2)}.\n\nPlease pay first udhaar.\n\nPress OK to continue or Cancel to stop.`;
+
+    return confirm(message);
+}
+
 function canGenerateBill(type) {
     return type === "sale" || type === "pisai";
 }
@@ -519,6 +546,7 @@ function buildTransactionBill(entry) {
 
     lines.push("");
     lines.push("Thank you.");
+    lines.push("Managed by Safachatt Group since 2022");
 
     return {
         name,

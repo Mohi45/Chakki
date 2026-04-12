@@ -22,6 +22,10 @@ function addSale() {
     let requiredKg = type * pkt;
     let amount = pkt * rate;
 
+    if (pay === "udhaar" && !confirmUdhaarBeforeContinue(name)) {
+        return;
+    }
+
     if (requiredKg > stock) {
         alert(`❌ Not enough stock!\nAvailable: ${formatKg(stock)}\nRequired: ${formatKg(requiredKg)}`);
         return;

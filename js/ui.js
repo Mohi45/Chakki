@@ -168,7 +168,7 @@ function render() {
             <datalist id="customerList">${customers}</datalist>
 
             <input id="newName" placeholder="${t("newCustomer")}">
-            <input id="phone" placeholder="${t("phone")}" maxlength="10" inputmode="numeric">
+            <input id="phone" placeholder="${t("phone")} *" maxlength="10" inputmode="numeric" required>
 
             <select id="type">
                 <option value="9">9kg</option>
@@ -215,7 +215,7 @@ function render() {
             oninput="autoFillPhone('pisaiName','pisaiPhone')">
             <datalist id="customerList">${customers}</datalist>
 
-            <input id="pisaiPhone" placeholder="${t("phone")}" maxlength="10" inputmode="numeric">
+            <input id="pisaiPhone" placeholder="${t("phone")} *" maxlength="10" inputmode="numeric" required>
             <input id="pisaiKg" placeholder="${t("kg")}" oninput="calcPisai()">
             <h3 id="pisaiAmount">₹0</h3>
 

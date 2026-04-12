@@ -17,6 +17,10 @@ function addPisai() {
     let amount = (kg * 1.90).toFixed(2);
     let now = new Date().toISOString();
 
+    if (pay === "udhaar" && !confirmUdhaarBeforeContinue(name)) {
+        return;
+    }
+
     pisai.push({
         name,
         phone,
