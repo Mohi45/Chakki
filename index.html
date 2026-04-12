@@ -41,10 +41,11 @@
         <div class="popup-box">
             <h3 id="addUdhaarTitle">📒 Add Udhaar</h3>
             <input list="popupCustomerList" id="newCustomerName" placeholder="Search or Add Customer"
-                oninput="autoFillPhone('newCustomerName','newCustomerPhone')">
+                oninput="autoFillPhone('newCustomerName','newCustomerPhone'); renderUdhaarPopupCustomers()">
             <datalist id="popupCustomerList"></datalist>
             <input id="newCustomerPhone" placeholder="Phone Number" maxlength="10" inputmode="numeric">
             <input id="popupAmount" placeholder="Amount">
+            <div id="udhaarPopupCustomerCards" style="margin-top:12px; max-height:260px; overflow:auto;"></div>
             <br><br>
             <button id="saveUdhaarBtn" onclick="savePopupUdhaar()">Save</button>
             <button id="cancelUdhaarBtn" onclick="closePopup()" style="background:red;color:white;">Cancel</button>

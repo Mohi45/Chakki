@@ -30,6 +30,7 @@ const translations = {
         received: "Received",
         profit: "Profit",
         addUdhaar: "Add Udhaar",
+        bill: "Bill",
         deleteAll: "Delete All",
         searchCustomer: "Search Customer",
         newCustomer: "New Customer",
@@ -80,6 +81,7 @@ const translations = {
         received: "प्राप्त",
         profit: "लाभ",
         addUdhaar: "उधार जोड़ें",
+        bill: "बिल",
         deleteAll: "सब हटाएं",
         searchCustomer: "ग्राहक खोजें",
         newCustomer: "नया ग्राहक",
@@ -103,24 +105,51 @@ const translations = {
 };
 
 function getCustomers() {
-    let names = [
-        ...sales.map(x => x.name),
-        ...pisai.map(x => x.name),
-        ...udhaar.map(x => x.name)
-    ];
-    return [...new Set(names.filter(Boolean))];
+    let all = [...sales, ...pisai, ...udhaar];
+    let seen = new Set();
+
+    return all
+        .map(x => formatCustomerName(x.name))
+        .filter(name => {
+            let key = normalizeCustomerName(name);
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+}
+
+function normalizeCustomerName(name) {
+    return String(name || "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+}
+
+function formatCustomerName(name) {
+    return String(name || "").trim().replace(/\s+/g, " ");
+}
+
+function getCustomerDisplayName(name) {
+    let formatted = formatCustomerName(name);
+    let normalized = normalizeCustomerName(formatted);
+    if (!normalized) return "";
+
+    let all = [...sales, ...pisai, ...udhaar, ...payments];
+    let found = all.find(x => normalizeCustomerName(x.name) === normalized);
+
+    return found ? formatCustomerName(found.name) : formatted;
 }
 
 function getCustomerPhone(name) {
     if (!name) return "";
-    name = name.toLowerCase().trim();
+    let normalizedName = normalizeCustomerName(name);
 
-    let all = [...sales, ...pisai, ...udhaar];
+    let all = [...sales, ...pisai, ...udhaar, ...payments];
 
     let found = all.find(x =>
         x.name &&
         x.phone &&
-        x.name.toLowerCase().trim() === name
+        normalizeCustomerName(x.name) === normalizedName
     );
 
     return found ? found.phone : "";
@@ -296,20 +325,26 @@ function renderHistory() {
     const search = (searchBox?.value || "").toLowerCase().trim();
     const historyItems = [];
 
-    sales.forEach(s => {
+    sales.forEach((s, index) => {
         historyItems.push({
             type: "sale",
+            ref: "sales",
+            index,
             date: s.date || "",
             name: s.name || "",
+            phone: s.phone || "",
             text: `🔴 ${s.name || ""} ${Number(s.kg || 0)}kg × ${Number(s.pkt || 0)}pkt @ ₹${Number(s.rate || 0)} = ₹${Number(s.amount || 0)}`
         });
     });
 
-    pisai.forEach(p => {
+    pisai.forEach((p, index) => {
         historyItems.push({
             type: "pisai",
+            ref: "pisai",
+            index,
             date: p.date || "",
             name: p.name || "",
+            phone: p.phone || "",
             text: `🟡 ${p.name || ""} ${Number(p.kg || 0)}kg ₹${Number(p.amount || 0)}`
         });
     });
@@ -363,6 +398,12 @@ function renderHistory() {
                 <div style="font-size:12px;color:#777;margin-top:6px;">
                     ${item.date ? new Date(item.date).toLocaleString("en-GB") : "Old Data"}
                 </div>
+                ${canGenerateBill(item.type) ? `
+                <button onclick="sendHistoryBill('${item.ref}', ${item.index}, '${item.type}')"
+                    style="margin-top:10px;">
+                    ${t("bill")}
+                </button>
+                ` : ""}
             </div>
         `).join("")
         : `<div class="card"><p style="color:#888;">${search ? "No matching history" : "No history yet"}</p></div>`;
@@ -377,6 +418,161 @@ function sendWhatsApp(name, phone, amount) {
     let msg = `Hello ${name},\nYour pending udhaar is ₹${amount}.\nPlease pay soon 🙏`;
     let url = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
+}
+
+function canGenerateBill(type) {
+    return type === "sale" || type === "pisai";
+}
+
+function getDataArrayByRef(ref) {
+    if (ref === "sales") return sales;
+    if (ref === "pisai") return pisai;
+    if (ref === "payments") return payments;
+    if (ref === "purchase") return purchase;
+    if (ref === "expenses") return expenses;
+    if (ref === "udhaar") return udhaar;
+
+    let dataArray = window[ref];
+    return Array.isArray(dataArray) ? dataArray : null;
+}
+
+function isSameTransaction(entry, record, type) {
+    if (!entry || !record) return false;
+
+    let sameName = normalizeCustomerName(entry.name) === normalizeCustomerName(record.name);
+    let samePhone = normalizePhone(entry.phone) === normalizePhone(record.phone);
+    let sameAmount = Number(entry.amount || 0) === Number(record.amount || 0);
+    let sameDate = Boolean(entry.date && record.date && entry.date === record.date);
+
+    if (type === "sale") {
+        return sameName &&
+            sameAmount &&
+            Number(entry.kg || 0) === Number(record.kg || 0) &&
+            Number(entry.pkt || 0) === Number(record.pkt || 0) &&
+            (sameDate || samePhone);
+    }
+
+    if (type === "pisai") {
+        return sameName &&
+            sameAmount &&
+            Number(entry.kg || 0) === Number(record.kg || 0) &&
+            (sameDate || samePhone);
+    }
+
+    return false;
+}
+
+function getTransactionRecord(ref, index, entry, type) {
+    let dataArray = getDataArrayByRef(ref);
+    if (!Array.isArray(dataArray)) return null;
+
+    let directRecord = dataArray[index];
+    if (directRecord) {
+        if (!entry || !type || isSameTransaction(entry, directRecord, type)) {
+            return directRecord;
+        }
+    }
+
+    if (!entry || !type) return directRecord || null;
+
+    return dataArray.find(record => isSameTransaction(entry, record, type)) || null;
+}
+
+function buildTransactionBill(entry) {
+    if (!entry || !canGenerateBill(entry.type)) return null;
+
+    let name = formatCustomerName(entry.name || "");
+    let phone = normalizePhone(entry.phone || "");
+    let amount = Number(entry.amount || 0);
+    let dateText = entry.date
+        ? new Date(entry.date).toLocaleString("en-GB")
+        : getDateTime();
+    let payType = entry.payType || entry.pay || "";
+    let paymentText = payType
+        ? payType.charAt(0).toUpperCase() + payType.slice(1)
+        : "-";
+    let lines = [
+        `Hello ${name},`,
+        "",
+        "GhanShayam Bhog Atta Chakki",
+        "Transaction Bill",
+        `Date: ${dateText}`,
+        ""
+    ];
+
+    if (entry.type === "sale") {
+        lines.push(`Customer: ${name}`);
+        lines.push("Type: Sale");
+        lines.push(`Pack Size: ${Number(entry.kg || 0)}kg`);
+        lines.push(`Packets: ${Number(entry.pkt || 0)}`);
+        lines.push(`Rate: ₹${Number(entry.rate || 0).toFixed(2)}`);
+        lines.push(`Total: ₹${amount.toFixed(2)}`);
+        lines.push(`Payment: ${paymentText}`);
+    } else {
+        lines.push(`Customer: ${name}`);
+        lines.push("Type: Pisai");
+        lines.push(`Weight: ${Number(entry.kg || 0)}kg`);
+        lines.push(`Rate: ₹${Number(entry.rate || 1.9).toFixed(2)}/kg`);
+        lines.push(`Total: ₹${amount.toFixed(2)}`);
+        lines.push(`Payment: ${paymentText}`);
+    }
+
+    lines.push("");
+    lines.push("Thank you.");
+
+    return {
+        name,
+        phone,
+        message: lines.join("\n")
+    };
+}
+
+function sendTransactionBill(entry) {
+    let bill = buildTransactionBill(entry);
+
+    if (!bill) {
+        alert("Bill is available only for Sale and Pisai");
+        return;
+    }
+
+    if (!bill.phone) {
+        alert("Add customer phone number to send bill");
+        return;
+    }
+
+    let url = `https://wa.me/91${bill.phone}?text=${encodeURIComponent(bill.message)}`;
+    window.open(url, "_blank");
+}
+
+function sendLastEntryBill(index) {
+    let entry = lastEntries[index];
+    if (!entry) return;
+
+    let record = getTransactionRecord(entry.ref, entry.index, entry, entry.type);
+    if (!record) {
+        alert("Transaction not found");
+        return;
+    }
+
+    sendTransactionBill({
+        ...record,
+        type: entry.type
+    });
+}
+
+function sendHistoryBill(ref, index, type) {
+    let dataArray = getDataArrayByRef(ref);
+    let fallbackEntry = Array.isArray(dataArray) ? dataArray[index] : null;
+    let record = getTransactionRecord(ref, index, fallbackEntry, type);
+    if (!record) {
+        alert("Transaction not found");
+        return;
+    }
+
+    sendTransactionBill({
+        ...record,
+        type
+    });
 }
 
 function formatKg(kg) {

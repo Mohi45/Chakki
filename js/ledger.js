@@ -1,6 +1,7 @@
 function showLedger() {
 
     let name = document.getElementById("ledgerName").value;
+    let normalizedName = normalizeCustomerName(name);
 
     if (!name) {
         alert("Select customer");
@@ -10,7 +11,7 @@ function showLedger() {
     let entries = [];
 
     // ✅ SALES
-    sales.filter(s => s.name === name).forEach(s => {
+    sales.filter(s => normalizeCustomerName(s.name) === normalizedName).forEach(s => {
         let date = s.date || null;
 
         if (s.pay === "instant") {
@@ -31,7 +32,7 @@ function showLedger() {
     });
 
     // ✅ PISAI
-    pisai.filter(p => p.name === name).forEach(p => {
+    pisai.filter(p => normalizeCustomerName(p.name) === normalizedName).forEach(p => {
         entries.push({
             sale: 0,
             pisai: Number(p.amount || 0),
@@ -41,7 +42,7 @@ function showLedger() {
     });
 
     // ✅ UDHAAR
-    udhaar.filter(u => u.name === name).forEach(u => {
+    udhaar.filter(u => normalizeCustomerName(u.name) === normalizedName).forEach(u => {
         entries.push({
             sale: Number(u.amount || 0),
             pisai: 0,
@@ -51,7 +52,7 @@ function showLedger() {
     });
 
     // ✅ PAYMENTS
-    payments.filter(p => p.name === name).forEach(p => {
+    payments.filter(p => normalizeCustomerName(p.name) === normalizedName).forEach(p => {
         entries.push({
             sale: 0,
             pisai: 0,

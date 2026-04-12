@@ -3,9 +3,9 @@ function render() {
 
     let lastEntryBox = `
 <div class="card" style="background:#f9f9f9; padding:12px;">
-    <b style="font-size:16px;">📊 ${t("lastEntries")}</b>
+    <b style="font-size:16px; display:block; text-align:center;">📊 ${t("lastEntries")}</b>
 
-    <div style="margin-top:10px;">
+    <div style="margin-top:10px; display:flex; flex-direction:column; gap:10px;">
     ${lastEntries.length
             ? lastEntries.map((e, i) => {
                 let color = "#333";
@@ -19,52 +19,76 @@ function render() {
                 if (e.type === "udhaar") color = "#6d4c41";
 
                 return `
-            <div style="
-                background:white;
-                border-radius:12px;
-                padding:10px;
-                margin-bottom:10px;
-                box-shadow:0 2px 6px rgba(0,0,0,0.08);
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
+<div style="
+    background:white;
+    border-radius:12px;
+    padding:12px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.08);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+">
+
+    <!-- TEXT -->
+    <div style="text-align:left;">
+        <div style="
+            font-size:14px;
+            font-weight:600;
+            color:${color};
+            line-height:1.4;
+            word-break:break-word;
+        ">
+            ${icon} ${e.text}
+        </div>
+
+        <div style="
+            font-size:11px;
+            color:#888;
+            margin-top:4px;
+        ">
+            ${e.time}
+        </div>
+    </div>
+
+    <!-- BUTTONS -->
+    <div style="
+        display:flex;
+        justify-content:flex-end;
+        gap:8px;
+    ">
+        ${canGenerateBill(e.type) ? `
+        <button onclick="sendLastEntryBill(${i})"
+            style="
+                background:#ff9800;
+                border:none;
+                color:white;
+                padding:6px 12px;
+                border-radius:16px;
+                font-size:13px;
+                font-weight:600;
             ">
-                <div style="flex:1;">
-                    <div style="
-                        font-size:14px;
-                        font-weight:600;
-                        color:${color};
-                    ">
-                        ${icon} ${e.text}
-                    </div>
+            ${t("bill")}
+        </button>
+        ` : ""}
 
-                    <div style="
-                        font-size:11px;
-                        color:#888;
-                        margin-top:4px;
-                    ">
-                        ${e.time}
-                    </div>
-                </div>
+        <button onclick="openEditPopup(${i})"
+            style="
+                background:#ff3b30;
+                border:none;
+                color:white;
+                width:32px;
+                height:32px;
+                border-radius:50%;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            ">
+            ✏️
+        </button>
+    </div>
 
-                <button onclick="openEditPopup(${i})"
-                    style="
-                        background:#ff3b30;
-                        border:none;
-                        color:white;
-                        width:36px;
-                        height:36px;
-                        border-radius:50%;
-                        display:flex;
-                        align-items:center;
-                        justify-content:center;
-                        cursor:pointer;
-                        flex-shrink:0;
-                    ">
-                    ✏️
-                </button>
-            </div>
-            `;
+</div>
+`;
             }).join("")
             : `<p style="color:#888;">${t("noEntries")}</p>`
         }

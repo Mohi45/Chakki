@@ -2,19 +2,21 @@ let currentCollectName = "";
 let currentCollectPhone = "";
 let currentCollectAmount = 0;
 
-function renderUdhaarPage() {
+function groupUdhaarByCustomer() {
     let grouped = {};
 
     udhaar.forEach(u => {
-        let key = u.name;
+        let key = normalizeCustomerName(u.name);
+        if (!key) return;
 
         if (!grouped[key]) {
             grouped[key] = {
-                name: u.name,
-                phone: u.phone,
+                name: formatCustomerName(u.name),
+                phone: u.phone || "",
                 sales: [],
                 pisai: [],
-                manual: []
+                manual: [],
+                total: 0
             };
         }
 
@@ -27,7 +29,15 @@ function renderUdhaarPage() {
         } else {
             grouped[key].manual.push(u);
         }
+
+        grouped[key].total += Number(u.amount || 0);
     });
+
+    return Object.values(grouped);
+}
+
+function renderUdhaarPage() {
+    let grouped = groupUdhaarByCustomer();
 
     let totalUdhaarAll = 0;
 
@@ -99,7 +109,7 @@ function renderUdhaarPage() {
 }
 
 function savePopupUdhaar() {
-    let name = document.getElementById("newCustomerName").value;
+    let name = getCustomerDisplayName(document.getElementById("newCustomerName").value);
     let phone = normalizePhone(document.getElementById("newCustomerPhone").value);
     let amount = parseFloat(document.getElementById("popupAmount").value) || 0;
 
@@ -128,17 +138,80 @@ function savePopupUdhaar() {
         time: getDateTime()
     });
 
+
     saveData();
+    // ✅ CLEAR INPUT
+    document.getElementById("newCustomerName").value = "";
+    document.getElementById("newCustomerPhone").value = "";
+    document.getElementById("popupAmount").value = "";
     closePopup();
     render();
 }
 
 function openPopup() {
+    let popupCustomerList = document.getElementById("popupCustomerList");
+    if (popupCustomerList) {
+        popupCustomerList.innerHTML = getCustomers()
+            .map(name => `<option value="${name}">${name}</option>`)
+            .join("");
+    }
+
+    renderUdhaarPopupCustomers();
     document.getElementById("udharPopup").style.display = "flex";
 }
 
 function closePopup() {
     document.getElementById("udharPopup").style.display = "none";
+    document.getElementById("newCustomerName").value = "";
+    document.getElementById("newCustomerPhone").value = "";
+    document.getElementById("popupAmount").value = "";
+}
+
+function selectPopupCustomer(name, phone) {
+    document.getElementById("newCustomerName").value = name || "";
+    document.getElementById("newCustomerPhone").value = phone || "";
+    renderUdhaarPopupCustomers();
+}
+
+function renderUdhaarPopupCustomers() {
+    let container = document.getElementById("udhaarPopupCustomerCards");
+    if (!container) return;
+
+    let search = (document.getElementById("newCustomerName")?.value || "").toLowerCase().trim();
+    let grouped = groupUdhaarByCustomer()
+        .filter(g => !search || g.name.toLowerCase().includes(search))
+        .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+
+    if (!grouped.length) {
+        container.innerHTML = "";
+        return;
+    }
+
+    container.innerHTML = grouped.map(g => {
+        let parts = [];
+        if (g.sales.length) parts.push(`${g.sales.length} sale`);
+        if (g.pisai.length) parts.push(`${g.pisai.length} pisai`);
+        if (g.manual.length) parts.push(`${g.manual.length} manual`);
+
+        return `
+            <div class="card" style="margin:0 0 10px 0; padding:10px; text-align:left;">
+                <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+                    <div>
+                        <div style="font-weight:700; color:#333;">${g.name}</div>
+                        <div style="font-size:12px; color:#777; margin-top:4px;">${g.phone || "-"}</div>
+                        <div style="font-size:12px; color:#555; margin-top:4px;">${parts.join(" • ")}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-weight:700; color:#ff6600;">₹${g.total.toFixed(2)}</div>
+                        <button onclick='selectPopupCustomer(${JSON.stringify(g.name)}, ${JSON.stringify(g.phone || "")})'
+                            style="margin-top:6px; padding:6px 10px; font-size:12px;">
+                            Use
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join("");
 }
 
 function sendWhatsApp(name, phone) {
@@ -147,7 +220,8 @@ function sendWhatsApp(name, phone) {
         return;
     }
 
-    let customerData = udhaar.filter(u => u.name === name);
+    let normalizedName = normalizeCustomerName(name);
+    let customerData = udhaar.filter(u => normalizeCustomerName(u.name) === normalizedName);
     let today = new Date();
     let dueDate = today.toLocaleDateString();
     let msg = `Hello ${name},\n\n📒 Your Udhaar Details:\n\n`;
@@ -212,13 +286,14 @@ function collectFull() {
         date: new Date().toISOString()
     });
 
-    udhaar = udhaar.filter(u => u.name !== name);
+    let normalizedName = normalizeCustomerName(name);
+    udhaar = udhaar.filter(u => normalizeCustomerName(u.name) !== normalizedName);
 
     addLastEntry({
         type: "payment",
         ref: "payments",
         index: payments.length - 1,
-        text: `🟢 ${name} Full Paid ₹${amount}`,
+        text: `💸${name} Full Paid ₹${amount}`,
         time: getDateTime()
     });
 
@@ -242,7 +317,7 @@ function collectPartial() {
     for (let i = 0; i < udhaar.length; i++) {
         let u = udhaar[i];
 
-        if (u.name === name && remaining > 0) {
+        if (normalizeCustomerName(u.name) === normalizeCustomerName(name) && remaining > 0) {
             if (u.amount <= remaining) {
                 remaining -= u.amount;
                 udhaar.splice(i, 1);
@@ -266,7 +341,7 @@ function collectPartial() {
         type: "payment",
         ref: "payments",
         index: payments.length - 1,
-        text: `🟢 ${name} Paid ₹${payAmount}`,
+        text: `💸 ${name} Paid ₹${payAmount}`,
         time: getDateTime()
     });
 
