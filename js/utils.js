@@ -29,6 +29,7 @@ const translations = {
         udhaar: "Udhaar",
         received: "Received",
         profit: "Profit",
+        outstandingExpense: "Outstanding Expense",
         addUdhaar: "Add Udhaar",
         bill: "Bill",
         deleteAll: "Delete All",
@@ -80,6 +81,7 @@ const translations = {
         udhaar: "उधार",
         received: "प्राप्त",
         profit: "लाभ",
+        outstandingExpense: "बकाया खर्च",
         addUdhaar: "उधार जोड़ें",
         bill: "बिल",
         deleteAll: "सब हटाएं",
@@ -211,6 +213,24 @@ function addLastEntry(entry) {
     });
 }
 
+function formatSalePackSize(kg) {
+    let numericKg = Number(kg || 0);
+    if (numericKg === 9) return "10kg";
+    if (numericKg === 49) return "50kg";
+    return `${numericKg}kg`;
+}
+
+function getLastEntryText(entry) {
+    if (!entry) return "";
+
+    if (entry.type === "sale") {
+        let record = getTransactionRecord(entry.ref, entry.index, entry, entry.type) || entry;
+        return `💰 ${formatSalePackSize(record.kg)} × ${Number(record.pkt || 0)}pkt @ ₹${Number(record.rate || 0)} = ₹${Number(record.amount || 0)}`;
+    }
+
+    return entry.text || "";
+}
+
 window.calcPisai = function () {
     let kgInput = document.getElementById("pisaiKg");
     let amountBox = document.getElementById("pisaiAmount");
@@ -339,7 +359,7 @@ function renderHistory() {
             date: s.date || "",
             name: s.name || "",
             phone: s.phone || "",
-            text: `🔴 ${s.name || ""} ${Number(s.kg || 0)}kg × ${Number(s.pkt || 0)}pkt @ ₹${Number(s.rate || 0)} = ₹${Number(s.amount || 0)}`
+            text: `🔴 ${s.name || ""} ${formatSalePackSize(s.kg)} × ${Number(s.pkt || 0)}pkt @ ₹${Number(s.rate || 0)} = ₹${Number(s.amount || 0)}`
         });
     });
 
@@ -530,7 +550,7 @@ function buildTransactionBill(entry) {
     if (entry.type === "sale") {
         lines.push(`Customer: ${name}`);
         lines.push("Type: Sale");
-        lines.push(`Pack Size: ${Number(entry.kg || 0)}kg`);
+        lines.push(`Pack Size: ${formatSalePackSize(entry.kg)}`);
         lines.push(`Packets: ${Number(entry.pkt || 0)}`);
         lines.push(`Rate: ₹${Number(entry.rate || 0).toFixed(2)}`);
         lines.push(`Total: ₹${amount.toFixed(2)}`);

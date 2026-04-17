@@ -52,7 +52,7 @@ function renderUdhaarPage() {
             let amt = Number(s.amount || 0);
 
             total += amt;
-            details.push(`🔴 ${kg}kg × ${pkt}pkt @ ₹${rate} = ₹${amt}`);
+            details.push(`🔴 ${formatSalePackSize(kg)} × ${pkt}pkt @ ₹${rate} = ₹${amt}`);
         });
 
         g.pisai.forEach(p => {
@@ -235,14 +235,14 @@ function sendWhatsApp(name, phone) {
             let amt = Number(u.amount || 0);
 
             total += amt;
-            msg += `📒 ${kg}kg × ${pkt}pkt @ ₹${rate} = ₹${amt}\n`;
+            msg += `📒 ${formatSalePackSize(kg)} × ${pkt}pkt @ ₹${rate} = ₹${amt}\n`;
         } else if (u.type === "pisai") {
             let kg = Number(u.kg || 0);
             let rate = 1.90;
             let amt = Number(u.amount || 0);
 
             total += amt;
-            msg += `🌾 ${kg}kg × ₹${rate} = ₹${amt}\n`;
+            msg += `🌾 ${kg + 1}kg × ₹${rate} = ₹${amt}\n`;
         } else {
             let amt = Number(u.amount || 0);
             total += amt;

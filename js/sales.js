@@ -86,7 +86,7 @@ function addSale() {
         kg,
         pkt,
         amount,
-        text: `💰 ${kg}kg × ${pkt}pkt @ ₹${rate} = ₹${amount}`,
+        text: `💰 ${formatSalePackSize(kg)} × ${pkt}pkt @ ₹${rate} = ₹${amount}`,
         time: getDateTime()
     });
 

@@ -38,7 +38,7 @@ function render() {
             line-height:1.4;
             word-break:break-word;
         ">
-            ${icon} ${e.text}
+            ${icon} ${getLastEntryText(e)}
         </div>
 
         <div style="
@@ -125,6 +125,7 @@ function render() {
     let salesPerKg = soldKg ? (totalSales / soldKg) : 0;
     let profitPerKg = salesPerKg - finalCostPerKg;
     let profit = profitPerKg * soldKg;
+    let outstandingExpense = totalExp - profit;
 
     if (page === "dashboard") {
         app.innerHTML = `
@@ -145,6 +146,7 @@ function render() {
         <div class="card stat">${t("udhaar")}<h3>₹${totalUdhaar.toFixed(2)}</h3></div>
         <div class="card stat">${t("received")}<h3>₹${received.toFixed(2)}</h3></div>
         <div class="card stat">${t("profit")}<h3>₹${profit.toFixed(2)}</h3></div>
+        <div class="card stat">${t("outstandingExpense")}<h3>₹${outstandingExpense.toFixed(2)}</h3></div>
     </div>
 
     <div class="card">
@@ -171,8 +173,8 @@ function render() {
             <input id="phone" placeholder="${t("phone")} *" maxlength="10" inputmode="numeric" required>
 
             <select id="type">
-                <option value="9">9kg</option>
-                <option value="50">50kg</option>
+                <option value="9">10kg</option>
+                <option value="49">50kg</option>
             </select>
 
             <input id="pkt" placeholder="${t("packets")}">
