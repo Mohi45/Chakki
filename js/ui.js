@@ -1,6 +1,27 @@
 function render() {
     updateStaticTranslations();
 
+    const header = document.querySelector(".header");
+    const footer = document.querySelector(".app-footer");
+    const bottomNav = document.querySelector(".bottom-nav");
+    const body = document.body;
+
+    if (header) {
+        header.classList.toggle("logged-out", !isLoggedIn);
+    }
+
+    if (body) {
+        body.classList.toggle("auth-mode", !isLoggedIn);
+    }
+
+    if (footer) {
+        footer.style.display = isLoggedIn ? "block" : "none";
+    }
+
+    if (bottomNav) {
+        bottomNav.style.display = isLoggedIn ? "flex" : "none";
+    }
+
     let lastEntryBox = `
 <div class="card" style="background:#f9f9f9; padding:12px;">
     <b style="font-size:16px; display:block; text-align:center;">📊 ${t("lastEntries")}</b>
@@ -98,6 +119,22 @@ function render() {
 
     const app = document.getElementById("app");
 
+    if (!isLoggedIn) {
+        app.innerHTML = `
+        <div class="auth-shell">
+            <div class="card auth-card">
+                <h3 id="loginTitle">Secure Login</h3>
+                <p id="loginSubtitle" class="auth-subtitle">Sign in to access Atta Chakki data</p>
+                <input id="loginUsername" placeholder="Username" autocomplete="username">
+                <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password"
+                    onkeydown="if(event.key==='Enter'){login()}">
+                <p id="loginError" class="auth-error"></p>
+                <button id="loginBtn" onclick="login()">Login</button>
+            </div>
+        </div>`;
+        return;
+    }
+
     let customers = getCustomers()
         .map(c => `<option value="${c}">${c}</option>`)
         .join("");
@@ -153,8 +190,9 @@ function render() {
         <button onclick="openPopup()">📒 ${t("addUdhaar")}</button>
     </div>
 
-    <div class="card">
-        <button onclick="deleteAllData()" style="background:red;">🗑 ${t("deleteAll")}</button>
+    <div class="card action-row">
+        <button id="logoutBtn" class="secondary-btn half-btn" onclick="logout()">Logout</button>
+        <button class="danger-btn half-btn" onclick="deleteAllData()">${t("deleteAll")}</button>
     </div>
 
     ${lastEntryBox}

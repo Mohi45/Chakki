@@ -11,8 +11,11 @@ const db = firebase.firestore();
 
 // ===================== LIVE SYNC =====================
 function startLiveSync() {
+    if (isDataLoaded) return;
 
-    db.collection("data").doc("main")
+    isDataLoaded = true;
+
+    liveSyncUnsubscribe = db.collection("data").doc("main")
         .onSnapshot((doc) => {
 
             console.log("🔥 Snapshot received");

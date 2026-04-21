@@ -214,7 +214,32 @@ function renderUdhaarPopupCustomers() {
     }).join("");
 }
 
-function sendWhatsApp(name, phone) {
+async function shareQrWithMessage(message) {
+    if (!navigator.share || !navigator.canShare) return false;
+
+    try {
+        const response = await fetch(PAYMENT_QR_PATH);
+        const blob = await response.blob();
+        const file = new File([blob], "payment-qr.jpeg", { type: blob.type || "image/jpeg" });
+
+        if (!navigator.canShare({ files: [file] })) {
+            return false;
+        }
+
+        await navigator.share({
+            title: "Payment QR",
+            text: message,
+            files: [file]
+        });
+
+        return true;
+    } catch (error) {
+        console.error("QR share failed:", error);
+        return false;
+    }
+}
+
+async function sendWhatsApp(name, phone) {
     if (!phone) {
         alert("No phone number");
         return;
@@ -253,6 +278,13 @@ function sendWhatsApp(name, phone) {
     msg += `\n💰 Total Udhaar: ₹${total.toFixed(2)}\n`;
     msg += `📅 Due Date: ${dueDate}\n\n`;
     msg += `Please pay soon 🙏`;
+    msg += 'उधार लेने वाले भूल जाते हैं, देने वाले याद रखते हैं!💸'
+    msg += 'Managed by Safachatt Group since 2022'
+
+    msg += `\nUPI ID: ${UPI_ID}`;
+
+    const qrShared = await shareQrWithMessage(msg);
+    if (qrShared) return;
 
     let url = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");

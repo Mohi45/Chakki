@@ -8,3 +8,5 @@ let payments = [];
 let lastEntries = [];
 let stock = 0;
 let page = "dashboard";
+let isLoggedIn = localStorage.getItem("chakkiLoggedIn") === "true";
+let liveSyncUnsubscribe = null;

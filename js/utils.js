@@ -685,6 +685,12 @@ function updateStaticTranslations() {
     setPlaceholder("editPhone", t("phoneNumber"));
     setPlaceholder("editKg", t("kgOrPackets"));
     setPlaceholder("editAmount", t("amount"));
+    setText("logoutBtn", "Logout");
+    setText("loginBtn", "Login");
+    setText("loginTitle", "Secure Login");
+    setText("loginSubtitle", "Sign in to access Atta Chakki data");
+    setPlaceholder("loginUsername", "Username");
+    setPlaceholder("loginPassword", "Password");
 }
 
 function toggleLang() {
