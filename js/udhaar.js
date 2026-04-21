@@ -239,7 +239,7 @@ async function shareQrWithMessage(message) {
     }
 }
 
-async function sendWhatsApp(name, phone) {
+function sendWhatsApp(name, phone) {
     if (!phone) {
         alert("No phone number");
         return;
@@ -283,9 +283,6 @@ async function sendWhatsApp(name, phone) {
     msg += 'Managed by Safachatt Group since 2022 \n'
 
     msg += `\nUPI ID: ${UPI_ID}`;
-
-    const qrShared = await shareQrWithMessage(msg);
-    if (qrShared) return;
 
     let url = `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`;
     window.open(url, "_blank");
