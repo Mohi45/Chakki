@@ -277,9 +277,10 @@ async function sendWhatsApp(name, phone) {
 
     msg += `\n💰 Total Udhaar: ₹${total.toFixed(2)}\n`;
     msg += `📅 Due Date: ${dueDate}\n\n`;
-    msg += `Please pay soon 🙏`;
-    msg += 'उधार लेने वाले भूल जाते हैं, देने वाले याद रखते हैं!💸'
-    msg += 'Managed by Safachatt Group since 2022'
+    msg += `Please pay soon 🙏 \n`;
+    msg += 'उधार लेने वाले भूल जाते हैं, देने वाले याद रखते हैं!💸 \n'
+    msg += "पेमेंट के बाद, कृपया स्क्रीनशॉट शेयर करें। \n \n"
+    msg += 'Managed by Safachatt Group since 2022 \n'
 
     msg += `\nUPI ID: ${UPI_ID}`;
 
