@@ -59,6 +59,7 @@ function addSale() {
             name,
             phone,
             amount,
+            date: payments[payments.length - 1].date,
             text: `🟢 ${name} Paid ₹${amount}`,
             time: getDateTime()
         });
@@ -86,6 +87,9 @@ function addSale() {
         kg,
         pkt,
         amount,
+        rate,
+        payType: pay,
+        date: sales[sales.length - 1].date,
         text: `💰 ${formatSalePackSize(kg)} × ${pkt}pkt @ ₹${rate} = ₹${amount}`,
         time: getDateTime()
     });

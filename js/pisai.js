@@ -46,6 +46,8 @@ function addPisai() {
         phone,
         kg,
         amount,
+        pay,
+        date: pisai[pisai.length - 1].date,
         text: `🌾 ${name} ${kg}kg ₹${amount}`,
         time: getDateTime()
     });

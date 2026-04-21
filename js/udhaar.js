@@ -134,6 +134,10 @@ function savePopupUdhaar() {
         type: "udhaar",
         ref: "udhaar",
         index: udhaar.length - 1,
+        name,
+        phone,
+        amount,
+        date: udhaar[udhaar.length - 1].date,
         text: `📒 ${name} Udhaar ₹${amount}`,
         time: getDateTime()
     });
@@ -323,6 +327,11 @@ function collectFull() {
         type: "payment",
         ref: "payments",
         index: payments.length - 1,
+        name,
+        phone,
+        amount,
+        mode: "full",
+        date: payments[payments.length - 1].date,
         text: `💸${name} Full Paid ₹${amount}`,
         time: getDateTime()
     });
@@ -371,6 +380,11 @@ function collectPartial() {
         type: "payment",
         ref: "payments",
         index: payments.length - 1,
+        name,
+        phone,
+        amount: payAmount,
+        mode: "partial",
+        date: payments[payments.length - 1].date,
         text: `💸 ${name} Paid ₹${payAmount}`,
         time: getDateTime()
     });

@@ -92,7 +92,7 @@ function render() {
         </button>
         ` : ""}
 
-        <button onclick="openEditPopup(${i})"
+        <button onclick="deleteLastEntry(${i})"
             style="
                 background:#ff3b30;
                 border:none;
@@ -104,7 +104,7 @@ function render() {
                 align-items:center;
                 justify-content:center;
             ">
-            ✏️
+            🗑️
         </button>
     </div>
 

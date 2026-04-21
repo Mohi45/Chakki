@@ -208,6 +208,11 @@ function addLastEntry(entry) {
         kg: entry.kg || 0,
         pkt: entry.pkt || 0,
         amount: entry.amount || 0,
+        rate: entry.rate || 0,
+        pay: entry.pay || "",
+        payType: entry.payType || "",
+        mode: entry.mode || "",
+        date: entry.date || "",
         text: entry.text,
         time: entry.time
     });
@@ -302,6 +307,169 @@ function updateEntry() {
 
     saveData();
     closeEditPopup();
+    render();
+}
+
+function adjustLastEntryIndexes(ref, removedIndex) {
+    lastEntries.forEach(entry => {
+        if (entry.ref === ref && entry.index > removedIndex) {
+            entry.index -= 1;
+        }
+    });
+}
+
+function removeLastEntryAt(index) {
+    lastEntries.splice(index, 1);
+}
+
+function removeLinkedLastEntry(ref, matcher) {
+    let linkedIndex = lastEntries.findIndex(entry =>
+        entry.ref === ref && matcher(entry)
+    );
+
+    if (linkedIndex !== -1) {
+        removeLastEntryAt(linkedIndex);
+    }
+}
+
+function deleteLinkedPayment(name, phone, amount, mode) {
+    let paymentIndex = payments.findIndex(payment =>
+        normalizeCustomerName(payment.name) === normalizeCustomerName(name) &&
+        normalizePhone(payment.phone || "") === normalizePhone(phone || "") &&
+        Number(payment.paid || 0) === Number(amount || 0) &&
+        (mode ? (payment.mode || "") === mode : true)
+    );
+
+    if (paymentIndex === -1 && !phone) {
+        paymentIndex = payments.findIndex(payment =>
+            normalizeCustomerName(payment.name) === normalizeCustomerName(name) &&
+            Number(payment.paid || 0) === Number(amount || 0) &&
+            (mode ? (payment.mode || "") === mode : true)
+        );
+    }
+
+    if (paymentIndex === -1) return;
+
+    payments.splice(paymentIndex, 1);
+    adjustLastEntryIndexes("payments", paymentIndex);
+    removeLinkedLastEntry("payments", entry =>
+        normalizeCustomerName(entry.name) === normalizeCustomerName(name) &&
+        Number(entry.amount || 0) === Number(amount || 0)
+    );
+}
+
+function deleteLinkedUdhaar(name, phone, amount, type, extraMatcher) {
+    let udhaarIndex = udhaar.findIndex(item =>
+        normalizeCustomerName(item.name) === normalizeCustomerName(name) &&
+        normalizePhone(item.phone || "") === normalizePhone(phone || "") &&
+        Number(item.amount || 0) === Number(amount || 0) &&
+        item.type === type &&
+        (!extraMatcher || extraMatcher(item))
+    );
+
+    if (udhaarIndex === -1) return;
+
+    udhaar.splice(udhaarIndex, 1);
+    adjustLastEntryIndexes("udhaar", udhaarIndex);
+    removeLinkedLastEntry("udhaar", entry =>
+        normalizeCustomerName(entry.name) === normalizeCustomerName(name) &&
+        Number(entry.amount || 0) === Number(amount || 0)
+    );
+}
+
+function deleteLastEntry(index) {
+    let entry = lastEntries[index];
+    if (!entry) return;
+
+    let confirmed = confirm(lang === "hi"
+        ? "क्या आप इस एंट्री को डिलीट करना चाहते हैं?"
+        : "Do you want to delete this entry?");
+
+    if (!confirmed) return;
+
+    if (entry.type === "sale") {
+        let record = getTransactionRecord(entry.ref, entry.index, entry, entry.type);
+        if (!record) return;
+
+        let saleIndex = sales.indexOf(record);
+        if (saleIndex === -1) return;
+
+        stock += Number(record.kg || 0) * Number(record.pkt || 0);
+
+        if ((record.payType || "") === "instant") {
+            deleteLinkedPayment(record.name, record.phone, record.amount);
+        }
+
+        if ((record.payType || "") === "udhaar") {
+            deleteLinkedUdhaar(record.name, record.phone, record.amount, "sale", item =>
+                Number(item.kg || 0) === Number(record.kg || 0) &&
+                Number(item.pkt || 0) === Number(record.pkt || 0)
+            );
+        }
+
+        sales.splice(saleIndex, 1);
+        adjustLastEntryIndexes("sales", saleIndex);
+        removeLastEntryAt(index);
+    } else if (entry.type === "pisai") {
+        let record = getTransactionRecord(entry.ref, entry.index, entry, entry.type);
+        if (!record) return;
+
+        let pisaiIndex = pisai.indexOf(record);
+        if (pisaiIndex === -1) return;
+
+        if ((record.pay || "") === "instant") {
+            deleteLinkedPayment(record.name, record.phone, record.amount);
+        }
+
+        if ((record.pay || "") === "udhaar") {
+            deleteLinkedUdhaar(record.name, record.phone, record.amount, "pisai", item =>
+                Number(item.kg || 0) === Number(record.kg || 0)
+            );
+        }
+
+        pisai.splice(pisaiIndex, 1);
+        adjustLastEntryIndexes("pisai", pisaiIndex);
+        removeLastEntryAt(index);
+    } else if (entry.type === "purchase") {
+        let record = purchase[entry.index];
+        if (!record) return;
+
+        stock -= Number(record.kg || 0);
+        purchase.splice(entry.index, 1);
+        adjustLastEntryIndexes("purchase", entry.index);
+        removeLastEntryAt(index);
+    } else if (entry.type === "expense") {
+        if (!expenses[entry.index]) return;
+
+        expenses.splice(entry.index, 1);
+        adjustLastEntryIndexes("expenses", entry.index);
+        removeLastEntryAt(index);
+    } else if (entry.type === "udhaar") {
+        if (!udhaar[entry.index]) return;
+
+        udhaar.splice(entry.index, 1);
+        adjustLastEntryIndexes("udhaar", entry.index);
+        removeLastEntryAt(index);
+    } else if (entry.type === "payment") {
+        let record = payments[entry.index];
+        if (!record) return;
+
+        if ((record.mode || "") === "full" || (record.mode || "") === "partial") {
+            udhaar.push({
+                name: record.name,
+                phone: record.phone || "",
+                amount: Number(record.paid || 0),
+                type: "manual",
+                date: new Date().toISOString()
+            });
+        }
+
+        payments.splice(entry.index, 1);
+        adjustLastEntryIndexes("payments", entry.index);
+        removeLastEntryAt(index);
+    }
+
+    saveData();
     render();
 }
 

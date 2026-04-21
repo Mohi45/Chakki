@@ -29,6 +29,8 @@ function addPurchase() {
         index: purchase.length - 1,
         kg,
         amount,
+        rate,
+        date: purchase[purchase.length - 1].date,
         text: `🛒 ${formatKg(kg)} @ ₹${rate} = ₹${amount}`,
         time: getDateTime()
     });
