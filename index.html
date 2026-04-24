@@ -20,6 +20,7 @@
     <script src="js/pisai.js"></script>
     <script src="js/purchase.js"></script>
     <script src="js/expense.js"></script>
+    <script src="js/calculator.js"></script>
     <script src="js/udhaar.js"></script>
     <script src="js/ledger.js"></script>
     <script src="js/ui.js"></script>
@@ -30,9 +31,11 @@
     <div class="header">
         <img src="img/chakkilogo.png" class="logo-img" onclick="setPage('dashboard')">
         <h2 class="title" id="pageTitle">🕉️ श्री गणेशाय नमः GhanShayam Bhog Atta Chakki</h2>
+        <button id="calculatorToggle" class="header-toggle" onclick="toggleCalculatorPanel()">Calculator</button>
         <button id="langToggle" class="header-toggle" onclick="toggleLang()">हिंदी</button>
     </div>
 
+    <div id="calculatorPanelHost"></div>
     <div id="app"></div>
 
     <button id="installBtn" style="display:none; margin:10px;">📲 Install App</button>

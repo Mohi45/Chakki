@@ -1,5 +1,6 @@
 function render() {
     updateStaticTranslations();
+    renderCalculatorPanel();
 
     const header = document.querySelector(".header");
     const footer = document.querySelector(".app-footer");

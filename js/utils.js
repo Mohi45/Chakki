@@ -4,6 +4,8 @@ const translations = {
     en: {
         home: "Home",
         buy: "Buy",
+        calculator: "Calculator",
+        closeCalculator: "Close Calc",
         history: "History",
         save: "Save",
         cancel: "Cancel",
@@ -56,6 +58,8 @@ const translations = {
     hi: {
         home: "होम",
         buy: "खरीद",
+        calculator: "कैलकुलेटर",
+        closeCalculator: "कैल्क बंद",
         history: "इतिहास",
         save: "सेव",
         cancel: "रद्द करें",
@@ -832,6 +836,7 @@ function updateStaticTranslations() {
     setHtml("navExpense", `💸<br>${t("expense")}`);
     setHtml("navUdhaar", `📒<br>${t("udhaar")}`);
     setHtml("navHistory", `📜<br>${t("history")}`);
+    setText("calculatorToggle", isCalculatorOpen ? t("closeCalculator") : t("calculator"));
 
     setText("installBtn", `📲 ${t("installApp")}`);
     setText("addUdhaarTitle", `📒 ${t("addUdhaar")}`);
